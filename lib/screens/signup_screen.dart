@@ -21,6 +21,13 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
+  // Hold latest signup form values for use in onAuthStateChange
+  String? _pendingFullName;
+  String? _pendingUsername;
+  String? _pendingCountry;
+  String? _pendingPhone;
+  String? _pendingEmail;
+
   @override
   void dispose() {
     _fullNameController.dispose();
@@ -42,7 +49,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _signup() async {
     if (!_formKey.currentState!.validate()) return;
-    final email = _emailController.text.trim();
+    // Store latest values for use in onAuthStateChange
+    _pendingFullName = _fullNameController.text.trim();
+    _pendingUsername = _usernameController.text.trim();
+    _pendingCountry = selectedCountry;
+    _pendingPhone = _phoneController.text.trim();
+    _pendingEmail = _emailController.text.trim();
+    final email = _pendingEmail!;
     if (email.isNotEmpty) {
       // Show Google signup confirmation dialog
       final proceed = await showDialog<bool>(
@@ -189,12 +202,12 @@ class _SignupScreenState extends State<SignupScreen> {
             .eq('id', user.id)
             .maybeSingle();
         if (profile == null) {
-          // Always use latest values from controllers
-          final username = _usernameController.text.trim();
-          final fullName = _fullNameController.text.trim();
-          final country = selectedCountry;
-          final phone = _phoneController.text.trim();
-          final email = _emailController.text.trim();
+          // Use pending values if available, else fallback to controllers
+          final username = _pendingUsername ?? _usernameController.text.trim();
+          final fullName = _pendingFullName ?? _fullNameController.text.trim();
+          final country = _pendingCountry ?? selectedCountry;
+          final phone = _pendingPhone ?? _phoneController.text.trim();
+          final email = _pendingEmail ?? _emailController.text.trim();
           try {
             await Supabase.instance.client.from('profiles').upsert({
               'id': user.id,

@@ -179,41 +179,41 @@ class _SignupScreenState extends State<SignupScreen> {
       final event = data.event;
       final session = data.session;
       if (event == AuthChangeEvent.signedIn && session != null) {
+        await Future.delayed(
+            const Duration(seconds: 2)); // Wait for user to be available
         final user = session.user;
-        if (user != null) {
-          // Check if profile exists
-          final profile = await Supabase.instance.client
-              .from('profiles')
-              .select()
-              .eq('id', user.id)
-              .maybeSingle();
-          if (profile == null) {
-            final username = _usernameController.text.trim();
-            final fullName = _fullNameController.text.trim();
-            final country = selectedCountry;
-            final phone = _phoneController.text.trim();
-            final email = _emailController.text.trim();
-            try {
-              await Supabase.instance.client.from('profiles').upsert({
-                'id': user.id,
-                'full_name': fullName,
-                'country': country,
-                'username': username,
-                'phone': phone,
-                'email': email,
-              });
-            } catch (e) {
-              print('Profile upsert error after Google sign-in: $e');
-              _showErrorDialog(
-                  'Failed to save profile after Google sign-in: $e');
-              return;
-            }
+        // Check if profile exists
+        final profile = await Supabase.instance.client
+            .from('profiles')
+            .select()
+            .eq('id', user.id)
+            .maybeSingle();
+        if (profile == null) {
+          // Always use latest values from controllers
+          final username = _usernameController.text.trim();
+          final fullName = _fullNameController.text.trim();
+          final country = selectedCountry;
+          final phone = _phoneController.text.trim();
+          final email = _emailController.text.trim();
+          try {
+            await Supabase.instance.client.from('profiles').upsert({
+              'id': user.id,
+              'full_name': fullName,
+              'country': country,
+              'username': username,
+              'phone': phone,
+              'email': email,
+            });
+          } catch (e) {
+            print('Profile upsert error after Google sign-in: $e');
+            _showErrorDialog('Failed to save profile after Google sign-in: $e');
+            return;
           }
-          if (mounted) {
-            Navigator.of(context, rootNavigator: true)
-                .popUntil((route) => route.isFirst);
-            Navigator.pushReplacementNamed(context, '/job_list');
-          }
+        }
+        if (mounted) {
+          Navigator.of(context, rootNavigator: true)
+              .popUntil((route) => route.isFirst);
+          Navigator.pushReplacementNamed(context, '/job_list');
         }
       }
     });

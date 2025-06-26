@@ -103,6 +103,7 @@ class _SignupScreenState extends State<SignupScreen> {
       final username = _usernameController.text.trim();
       final fullName = _fullNameController.text.trim();
       final country = selectedCountry;
+      final email = _emailController.text.trim();
       // Check if user exists
       final existing = await Supabase.instance.client
           .from('profiles')
@@ -116,14 +117,19 @@ class _SignupScreenState extends State<SignupScreen> {
       }
       // Hash password before storing
       final hashedPassword = hashPassword(password);
-      // Insert new profile WITHOUT id, so DB generates UUID
-      final response = await Supabase.instance.client.from('profiles').insert({
+      final profileData = {
         'full_name': fullName,
         'country': country,
         'username': username,
         'phone': phone,
+        'email': email,
         'password': hashedPassword,
-      });
+      };
+      print('--- Phone-only profile data to be saved ---');
+      profileData.forEach((k, v) => print('$k: $v'));
+      // Insert new profile WITHOUT id, so DB generates UUID
+      final response =
+          await Supabase.instance.client.from('profiles').insert(profileData);
       print('Inserted profile: $response');
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
@@ -333,56 +339,59 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildSelectMode() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('Create Account',
-            style: GoogleFonts.montserrat(
-                fontSize: 24, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 40),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0.0),
-          child: OutlinedButton(
-            onPressed: () async {
-              setState(() {
-                _mode = SignupMode.googleProfile;
-              });
-              await _signUpWithGoogleAndProfile();
-            },
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.transparent),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Create Account',
+              style: GoogleFonts.montserrat(
+                  fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 40),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0.0),
+            child: OutlinedButton(
+              onPressed: () async {
+                setState(() {
+                  _mode = SignupMode.googleProfile;
+                });
+                await _signUpWithGoogleAndProfile();
+              },
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.transparent),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(0),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 0),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 0),
-            ),
-            child: Image.asset(
-              'assets/google.png',
-              height: 40,
-              width: 250,
+              child: Image.asset(
+                'assets/google.png',
+                height: 40,
+                width: 250,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              onPressed: () {
+                setState(() {
+                  _mode = SignupMode.phone;
+                });
+              },
+              child: Text('I have no email', style: GoogleFonts.montserrat()),
             ),
-            onPressed: () {
-              setState(() {
-                _mode = SignupMode.phone;
-              });
-            },
-            child: Text('I have no email', style: GoogleFonts.montserrat()),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

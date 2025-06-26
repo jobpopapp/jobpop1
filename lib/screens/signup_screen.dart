@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/password_hash.dart';
 
-enum SignupMode { select, phone, googleProfile }
+enum SignupMode { select, phone, googleProfile, completeAuthProfile }
 
 class SignupScreen extends StatefulWidget {
   final VoidCallback? onToggleLanguage;
@@ -24,12 +24,9 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  // Hold latest signup form values for use in onAuthStateChange
-  String? _pendingFullName;
-  String? _pendingUsername;
-  String? _pendingCountry;
-  String? _pendingPhone;
-  String? _pendingEmail;
+  // For complete auth profile mode
+  String? _authProfileUserId;
+  String? _authProfileEmail;
 
   @override
   void dispose() {
@@ -52,13 +49,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _signup() async {
     if (!_formKey.currentState!.validate()) return;
-    // Store latest values for use in onAuthStateChange
-    _pendingFullName = _fullNameController.text.trim();
-    _pendingUsername = _usernameController.text.trim();
-    _pendingCountry = selectedCountry;
-    _pendingPhone = _phoneController.text.trim();
-    _pendingEmail = _emailController.text.trim();
-    final email = _pendingEmail!;
+    // Remove unused pending* variables
+    final email = _emailController.text.trim();
     if (email.isNotEmpty) {
       // Show Google signup confirmation dialog
       final proceed = await showDialog<bool>(
@@ -100,9 +92,6 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       final phone = _phoneController.text.trim();
       final password = _passwordController.text.trim();
-      final username = _usernameController.text.trim();
-      final fullName = _fullNameController.text.trim();
-      final country = selectedCountry;
       final email = _emailController.text.trim();
       // Check if user exists
       final existing = await Supabase.instance.client
@@ -118,9 +107,9 @@ class _SignupScreenState extends State<SignupScreen> {
       // Hash password before storing
       final hashedPassword = hashPassword(password);
       final profileData = {
-        'full_name': fullName,
-        'country': country,
-        'username': username,
+        'full_name': _fullNameController.text.trim(),
+        'country': selectedCountry,
+        'username': _usernameController.text.trim(),
         'phone': phone,
         'email': email,
         'password': hashedPassword,
@@ -166,9 +155,6 @@ class _SignupScreenState extends State<SignupScreen> {
       final email = _emailController.text.trim();
       final phone = _phoneController.text.trim();
       final password = _passwordController.text.trim();
-      final username = _usernameController.text.trim();
-      final fullName = _fullNameController.text.trim();
-      final country = selectedCountry;
       final response = await Supabase.instance.client.auth.signUp(
         email: email.isNotEmpty ? email : null,
         phone: phone.isNotEmpty ? phone : null,
@@ -176,23 +162,13 @@ class _SignupScreenState extends State<SignupScreen> {
       );
       final user = response.user;
       if (user != null && user.id.isNotEmpty) {
-        final hashedPassword = hashPassword(password);
-        final profileData = {
-          'id': user.id,
-          'full_name': fullName,
-          'country': country,
-          'username': username,
-          'phone': phone,
-          'email': user.email ?? email,
-          'password': hashedPassword,
-        };
-        print('--- Profile data to be saved for auth user ---');
-        profileData.forEach((k, v) => print('$k: $v'));
-        await Supabase.instance.client.from('profiles').insert(profileData);
-        if (mounted) {
-          Navigator.of(context, rootNavigator: true).pop();
-          Navigator.pushReplacementNamed(context, '/job_list');
-        }
+        Navigator.of(context, rootNavigator: true).pop();
+        setState(() {
+          _authProfileUserId = user.id;
+          _authProfileEmail = user.email ?? email;
+          _mode = SignupMode.completeAuthProfile;
+        });
+        return;
       } else {
         Navigator.of(context, rootNavigator: true).pop();
         _showErrorDialog('Signup failed. User ID not returned.');
@@ -214,42 +190,13 @@ class _SignupScreenState extends State<SignupScreen> {
       final event = data.event;
       final session = data.session;
       if (event == AuthChangeEvent.signedIn && session != null) {
-        await Future.delayed(
-            const Duration(seconds: 2)); // Wait for user to be available
         final user = session.user;
-        // Check if profile exists
-        final profile = await Supabase.instance.client
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .maybeSingle();
-        if (profile == null) {
-          // Use pending values if available, else fallback to controllers
-          final username = _pendingUsername ?? _usernameController.text.trim();
-          final fullName = _pendingFullName ?? _fullNameController.text.trim();
-          final country = _pendingCountry ?? selectedCountry;
-          final phone = _pendingPhone ?? _phoneController.text.trim();
-          final email = _pendingEmail ?? _emailController.text.trim();
-          try {
-            await Supabase.instance.client.from('profiles').upsert({
-              'id': user.id,
-              'full_name': fullName,
-              'country': country,
-              'username': username,
-              'phone': phone,
-              'email': email,
-            });
-          } catch (e) {
-            print('Profile upsert error after Google sign-in: $e');
-            _showErrorDialog('Failed to save profile after Google sign-in: $e');
-            return;
-          }
-        }
-        if (mounted) {
-          Navigator.of(context, rootNavigator: true)
-              .popUntil((route) => route.isFirst);
-          Navigator.pushReplacementNamed(context, '/job_list');
-        }
+        // Always show complete profile UI after Google OAuth
+        setState(() {
+          _authProfileUserId = user.id;
+          _authProfileEmail = user.email;
+          _mode = SignupMode.completeAuthProfile;
+        });
       }
     });
   }
@@ -335,6 +282,9 @@ class _SignupScreenState extends State<SignupScreen> {
         return _buildPhoneMode();
       case SignupMode.googleProfile:
         return _buildGoogleProfileMode();
+      case SignupMode.completeAuthProfile:
+        return _buildCompleteAuthProfileMode(
+            _authProfileUserId!, _authProfileEmail);
     }
   }
 
@@ -468,16 +418,6 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // Email (optional)
-            TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email (Optional)',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 16),
             // Phone
             const Align(
                 alignment: Alignment.centerLeft,
@@ -558,14 +498,213 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
+
+  Widget _buildCompleteAuthProfileMode(String userId, String? email) {
+    final _completeFormKey = GlobalKey<FormState>();
+    final _fullNameController = TextEditingController();
+    final _usernameController = TextEditingController();
+    final _phoneController = TextEditingController();
+    String country = 'UG';
+
+    Future<void> _submit() async {
+      if (!_completeFormKey.currentState!.validate()) return;
+      setState(() => _isLoading = true);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: Color(0xFFFFD23F)),
+        ),
+      );
+      try {
+        final profileData = {
+          'id': userId,
+          'full_name': _fullNameController.text.trim(),
+          'country': country,
+          'username': _usernameController.text.trim(),
+          'phone': _phoneController.text.trim(),
+          'email': email ?? '',
+        };
+        print('--- Auth profile completion data to be saved ---');
+        profileData.forEach((k, v) => print('$k: $v'));
+        await Supabase.instance.client.from('profiles').upsert(profileData);
+        if (mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          Navigator.pushReplacementNamed(context, '/job_list');
+        }
+      } catch (e) {
+        Navigator.of(context, rootNavigator: true).pop();
+        print('Profile completion error: $e');
+        _showErrorDialog('Failed to complete profile: $e');
+      } finally {
+        setState(() => _isLoading = false);
+      }
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Form(
+        key: _completeFormKey,
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            Text('Complete signing up',
+                style: GoogleFonts.montserrat(
+                    fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+            TextFormField(
+              controller: _fullNameController,
+              validator: (v) =>
+                  v == null || v.isEmpty ? 'Full name required' : null,
+              decoration: InputDecoration(
+                labelText: 'Full Name *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: country,
+              decoration: InputDecoration(
+                labelText: 'Country *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'UG', child: Text('Uganda')),
+                DropdownMenuItem(value: 'KE', child: Text('Kenya')),
+                DropdownMenuItem(value: 'TZ', child: Text('Tanzania')),
+              ],
+              onChanged: (value) {
+                country = value ?? 'UG';
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _usernameController,
+              validator: (v) =>
+                  v == null || v.isEmpty ? 'Username required' : null,
+              decoration: InputDecoration(
+                labelText: 'Username *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _phoneController,
+              validator: _validatePhone,
+              decoration: InputDecoration(
+                labelText: 'Phone *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text('Submit',
+                    style: GoogleFonts.montserrat(color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class CompleteProfileScreen extends StatelessWidget {
+class CompleteProfileScreen extends StatefulWidget {
   final String userId;
   final String? email;
 
   const CompleteProfileScreen({Key? key, required this.userId, this.email})
       : super(key: key);
+
+  @override
+  State<CompleteProfileScreen> createState() => _CompleteProfileScreenState();
+}
+
+class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _fullNameController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _countryController = TextEditingController(text: 'UG');
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _usernameController.dispose();
+    _phoneController.dispose();
+    _countryController.dispose();
+    super.dispose();
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.isEmpty) return 'Phone required';
+    final phonePattern = RegExp(r'^0[7][0-9]{8}');
+    if (!phonePattern.hasMatch(value)) {
+      return 'Enter phone in 07XXXXXXXX format';
+    }
+    return null;
+  }
+
+  Future<void> _submitProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: Color(0xFFFFD23F)),
+      ),
+    );
+    try {
+      final profileData = {
+        'id': widget.userId,
+        'full_name': _fullNameController.text.trim(),
+        'country': _countryController.text.trim(),
+        'username': _usernameController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'email': widget.email ?? '',
+      };
+      print('--- Complete profile data to be saved ---');
+      profileData.forEach((k, v) => print('$k: $v'));
+      await Supabase.instance.client.from('profiles').upsert(profileData);
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        Navigator.pushReplacementNamed(context, '/job_list');
+      }
+    } catch (e) {
+      Navigator.of(context, rootNavigator: true).pop();
+      print('Profile completion error: $e');
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: Text('Failed to complete profile: $e'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -575,23 +714,86 @@ class CompleteProfileScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            Text(
-              'Please complete your profile information.',
-              style: GoogleFonts.montserrat(fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            // Add fields for profile completion as needed
-            ElevatedButton(
-              onPressed: () async {
-                // Handle profile completion submission
-                // Navigate to the main app screen or show a success message
-              },
-              child: Text('Submit', style: GoogleFonts.montserrat()),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Please complete your profile information.',
+                style: GoogleFonts.montserrat(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              TextFormField(
+                controller: _fullNameController,
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Full name required' : null,
+                decoration: InputDecoration(
+                  labelText: 'Full Name *',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _countryController.text.isNotEmpty
+                    ? _countryController.text
+                    : 'UG',
+                decoration: InputDecoration(
+                  labelText: 'Country *',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'UG', child: Text('Uganda')),
+                  DropdownMenuItem(value: 'KE', child: Text('Kenya')),
+                  DropdownMenuItem(value: 'TZ', child: Text('Tanzania')),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _countryController.text = value ?? 'UG';
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _usernameController,
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Username required' : null,
+                decoration: InputDecoration(
+                  labelText: 'Username *',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _phoneController,
+                validator: _validatePhone,
+                decoration: InputDecoration(
+                  labelText: 'Phone *',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _submitProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Submit',
+                      style: GoogleFonts.montserrat(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

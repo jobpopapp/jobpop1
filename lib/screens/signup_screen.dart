@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/password_hash.dart';
 
+enum SignupMode { select, phone, googleProfile }
+
 class SignupScreen extends StatefulWidget {
   final VoidCallback? onToggleLanguage;
   const SignupScreen({super.key, this.onToggleLanguage});
@@ -12,6 +14,7 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  SignupMode _mode = SignupMode.select;
   String selectedCountry = 'UG';
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
@@ -313,128 +316,172 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                Image.asset('assets/logo.png', height: 100),
-                const SizedBox(height: 16),
-                Text('Create New User',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black)),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _fullNameController,
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Full name required' : null,
-                  decoration: InputDecoration(
-                    labelText: 'Full Name *',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                DropdownButtonFormField<String>(
-                  value: selectedCountry,
-                  decoration: InputDecoration(
-                    labelText: 'Country *',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'UG', child: Text('Uganda')),
-                    DropdownMenuItem(value: 'KE', child: Text('Kenya')),
-                    DropdownMenuItem(value: 'TZ', child: Text('Tanzania')),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      selectedCountry = value ?? 'UG';
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _usernameController,
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Username required' : null,
-                  decoration: InputDecoration(
-                    labelText: 'Username *',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email (Optional)',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _phoneController,
-                  validator: _validatePhone,
-                  decoration: InputDecoration(
-                    labelText: 'Phone *',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  validator: (v) =>
-                      v == null || v.length < 6 ? 'Password min 6 chars' : null,
-                  decoration: InputDecoration(
-                    labelText: 'Password *',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 28),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    onPressed: _isLoading ? null : _signup,
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text('CREATE ACCOUNT',
-                            style: GoogleFonts.montserrat(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.white)),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {},
-                  child: Text('Signup as a Company Instead',
-                      style: GoogleFonts.montserrat(
-                          color: const Color(0xFF007BFF))),
-                ),
-                const SizedBox(height: 24),
-                IconButton(
-                  icon: const Icon(Icons.home, size: 30, color: Colors.black),
-                  onPressed: () {},
-                ),
-                const SizedBox(height: 16),
-              ],
+        child: _buildBody(context),
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    switch (_mode) {
+      case SignupMode.select:
+        return _buildSelectMode();
+      case SignupMode.phone:
+        return _buildPhoneMode();
+      case SignupMode.googleProfile:
+        return _buildGoogleProfileMode();
+    }
+  }
+
+  Widget _buildSelectMode() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Create Account',
+            style: GoogleFonts.montserrat(
+                fontSize: 24, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 40),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+          child: OutlinedButton(
+            onPressed: () async {
+              setState(() {
+                _mode = SignupMode.googleProfile;
+              });
+              await _signUpWithGoogleAndProfile();
+            },
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.transparent),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 0),
+            ),
+            child: Image.asset(
+              'assets/google.png',
+              height: 40,
+              width: 250,
             ),
           ),
         ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            onPressed: () {
+              setState(() {
+                _mode = SignupMode.phone;
+              });
+            },
+            child: Text('I have no email', style: GoogleFonts.montserrat()),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhoneMode() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Sign up with Phone',
+              style: GoogleFonts.montserrat(
+                  fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 32),
+          TextFormField(
+            controller: _fullNameController,
+            validator: (v) =>
+                v == null || v.isEmpty ? 'Full name required' : null,
+            decoration: InputDecoration(
+              labelText: 'Full Name *',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _usernameController,
+            validator: (v) =>
+                v == null || v.isEmpty ? 'Username required' : null,
+            decoration: InputDecoration(
+              labelText: 'Username *',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _phoneController,
+            validator: _validatePhone,
+            decoration: InputDecoration(
+              labelText: 'Phone *',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _passwordController,
+            obscureText: true,
+            validator: (v) =>
+                v == null || v.isEmpty ? 'Password required' : null,
+            decoration: InputDecoration(
+              labelText: 'Password *',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 28),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: _signup,
+              child: Text('Sign Up', style: GoogleFonts.montserrat()),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+              child: Text(
+                'Already have an account? Log in',
+                style: GoogleFonts.montserrat(color: Colors.black),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGoogleProfileMode() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(color: Color(0xFFFFD23F)),
+          const SizedBox(height: 16),
+          Text('Signing you up with Google...',
+              style: GoogleFonts.montserrat(
+                  color: Colors.black, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }

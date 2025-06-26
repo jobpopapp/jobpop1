@@ -1,8 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class JobListScreen extends StatelessWidget {
+class JobListScreen extends StatefulWidget {
   const JobListScreen({super.key});
+
+  @override
+  State<JobListScreen> createState() => _JobListScreenState();
+}
+
+class _JobListScreenState extends State<JobListScreen> {
+  final supabase = Supabase.instance.client;
+  String username = 'Loading...';
+  int newJobsCount = 3; // Replace with dynamic Supabase query as needed
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+    // fetchNewJobsCount(); // Optional: implement job counting logic
+  }
+
+  Future<void> fetchUserName() async {
+    final user = supabase.auth.currentUser;
+    if (user != null) {
+      final response = await supabase
+          .from('users')
+          .select('name')
+          .eq('id', user.id)
+          .single();
+      setState(() {
+        username = response['name'] ?? 'User';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,160 +42,119 @@ class JobListScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text('Jobs',
-            style: GoogleFonts.montserrat(
-                color: Colors.black, fontWeight: FontWeight.bold)),
+        titleSpacing: 16,
+        title: Text(
+          username,
+          style: GoogleFonts.montserrat(
+              color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
-            icon: Stack(
-              children: [
-                const Icon(Icons.notifications_none, color: Colors.black),
-                Positioned(
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFD62828),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Text('3',
-                        style: TextStyle(color: Colors.white, fontSize: 10)),
-                  ),
-                ),
-              ],
-            ),
-            onPressed: () {},
+            icon: const Icon(Icons.logout, color: Colors.red),
+            onPressed: () {
+              // TODO: logout logic
+            },
           ),
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'Country',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'Uganda', child: Text('Uganda')),
-                      DropdownMenuItem(value: 'Abroad', child: Text('Abroad')),
-                    ],
-                    onChanged: (value) {},
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                          value: 'Education', child: Text('Education')),
-                      DropdownMenuItem(value: 'Health', child: Text('Health')),
-                      DropdownMenuItem(value: 'Other', child: Text('Other')),
-                    ],
-                    onChanged: (value) {},
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextField(
+            Text('Find a job anywhere',
+                style: GoogleFonts.montserrat(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black)),
+            const SizedBox(height: 24),
+            DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: 'Search jobs',
-                prefixIcon: const Icon(Icons.search),
+                labelText: 'Choose Country (Optional)',
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'Sort',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                          value: 'deadline', child: Text('By Deadline')),
-                      DropdownMenuItem(
-                          value: 'newest', child: Text('Newest First')),
-                    ],
-                    onChanged: (value) {},
-                  ),
-                ),
+              items: const [
+                DropdownMenuItem(value: 'Uganda', child: Text('Uganda')),
+                DropdownMenuItem(value: 'Abroad', child: Text('Abroad')),
               ],
+              onChanged: (value) {},
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Job Title $index',
-                                  style: GoogleFonts.montserrat(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18)),
-                              IconButton(
-                                icon: const Icon(Icons.bookmark_border),
-                                onPressed: () {},
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text('Salary: UGX 1,000,000',
-                              style: GoogleFonts.montserrat()),
-                          Text('Country: Uganda',
-                              style: GoogleFonts.montserrat()),
-                          Text('Deadline: 2025-07-01',
-                              style: GoogleFonts.montserrat()),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFD62828),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: Text('Apply',
-                                    style: GoogleFonts.montserrat()),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                labelText: 'Job Category *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'Education', child: Text('Education')),
+                DropdownMenuItem(value: 'Health', child: Text('Health')),
+                DropdownMenuItem(value: 'Other', child: Text('Other')),
+              ],
+              onChanged: (value) {},
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: () {
+                  // TODO: trigger job search
                 },
+                child: Text('SEARCH',
+                    style: GoogleFonts.montserrat(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: Colors.amber[800],
+        unselectedItemColor: Colors.grey,
+        currentIndex: 1,
+        onTap: (index) {
+          // TODO: Handle tab switching
+        },
+        items: [
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.person), label: 'Profile'),
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.search), label: 'Jobs'),
+          BottomNavigationBarItem(
+            icon: Stack(
+              children: [
+                const Icon(Icons.notifications_none),
+                if (newJobsCount > 0)
+                  Positioned(
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFD62828),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$newJobsCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            label: 'Alerts',
+          ),
+        ],
       ),
     );
   }

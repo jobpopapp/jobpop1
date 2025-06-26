@@ -387,86 +387,150 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildPhoneMode() {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('Sign up with Phone',
-              style: GoogleFonts.montserrat(
-                  fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 32),
-          TextFormField(
-            controller: _fullNameController,
-            validator: (v) =>
-                v == null || v.isEmpty ? 'Full name required' : null,
-            decoration: InputDecoration(
-              labelText: 'Full Name *',
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            Image.asset('assets/logo.png', height: 100),
+            const SizedBox(height: 16),
+            const Text(
+              'Create New User',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: _usernameController,
-            validator: (v) =>
-                v == null || v.isEmpty ? 'Username required' : null,
-            decoration: InputDecoration(
-              labelText: 'Username *',
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: _phoneController,
-            validator: _validatePhone,
-            decoration: InputDecoration(
-              labelText: 'Phone *',
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: true,
-            validator: (v) =>
-                v == null || v.isEmpty ? 'Password required' : null,
-            decoration: InputDecoration(
-              labelText: 'Password *',
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-          const SizedBox(height: 28),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+            const SizedBox(height: 24),
+            // Name
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Please fill in your full name',
+                    style: TextStyle(color: Colors.red))),
+            const SizedBox(height: 4),
+            TextFormField(
+              controller: _fullNameController,
+              validator: (v) =>
+                  v == null || v.isEmpty ? 'Full name required' : null,
+              decoration: InputDecoration(
+                labelText: 'Full Name *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              onPressed: _signup,
-              child: Text('Sign Up', style: GoogleFonts.montserrat()),
             ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: TextButton(
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, '/login');
+            const SizedBox(height: 16),
+            // Country
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Please select a country',
+                    style: TextStyle(color: Colors.red))),
+            const SizedBox(height: 4),
+            DropdownButtonFormField<String>(
+              value: selectedCountry,
+              decoration: InputDecoration(
+                labelText: 'Country *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'UG', child: Text('Uganda')),
+                DropdownMenuItem(value: 'KE', child: Text('Kenya')),
+                DropdownMenuItem(value: 'TZ', child: Text('Tanzania')),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  selectedCountry = value ?? 'UG';
+                });
               },
-              child: Text(
-                'Already have an account? Log in',
-                style: GoogleFonts.montserrat(color: Colors.black),
+            ),
+            const SizedBox(height: 16),
+            // Username
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Please enter your username',
+                    style: TextStyle(color: Colors.red))),
+            const SizedBox(height: 4),
+            TextFormField(
+              controller: _usernameController,
+              validator: (v) =>
+                  v == null || v.isEmpty ? 'Username required' : null,
+              decoration: InputDecoration(
+                labelText: 'Username *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            // Email (optional)
+            TextFormField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: 'Email (Optional)',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Phone
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Please enter your phone',
+                    style: TextStyle(color: Colors.red))),
+            const SizedBox(height: 4),
+            TextFormField(
+              controller: _phoneController,
+              validator: _validatePhone,
+              decoration: InputDecoration(
+                labelText: 'Phone *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Password
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Please enter your password',
+                    style: TextStyle(color: Colors.red))),
+            const SizedBox(height: 4),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              validator: (v) =>
+                  v == null || v.isEmpty ? 'Password required' : null,
+              decoration: InputDecoration(
+                labelText: 'Password *',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 28),
+            // Login Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _signup,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('LOGIN',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Signup as company
+            TextButton(
+              onPressed: () {},
+              child: const Text(
+                'Signup as a Company Instead',
+                style: TextStyle(color: Colors.blue),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }

@@ -141,7 +141,17 @@ class _SignupScreenState extends State<SignupScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(
-          child: CircularProgressIndicator(color: Color(0xFFFFD23F))), // Yellow
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: Color(0xFFFFD23F)),
+            SizedBox(height: 16),
+            Text('Creating Account...',
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
     );
     try {
       final email = _emailController.text.trim();
@@ -156,24 +166,27 @@ class _SignupScreenState extends State<SignupScreen> {
         password: password,
       );
       final user = response.user;
-      if (user != null) {
+      if (user != null && user.id.isNotEmpty) {
         final hashedPassword = hashPassword(password);
-        await Supabase.instance.client.from('profiles').insert({
+        final profileData = {
           'id': user.id,
           'full_name': fullName,
           'country': country,
           'username': username,
           'phone': phone,
-          'email': email,
+          'email': user.email ?? email,
           'password': hashedPassword,
-        });
+        };
+        print('--- Profile data to be saved for auth user ---');
+        profileData.forEach((k, v) => print('$k: $v'));
+        await Supabase.instance.client.from('profiles').insert(profileData);
         if (mounted) {
           Navigator.of(context, rootNavigator: true).pop();
           Navigator.pushReplacementNamed(context, '/job_list');
         }
       } else {
         Navigator.of(context, rootNavigator: true).pop();
-        _showErrorDialog('Signup failed.');
+        _showErrorDialog('Signup failed. User ID not returned.');
       }
     } catch (e) {
       Navigator.of(context, rootNavigator: true).pop();

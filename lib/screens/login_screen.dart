@@ -18,6 +18,22 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+      final event = data.event;
+      final session = data.session;
+      if (event == AuthChangeEvent.signedIn && session != null) {
+        if (mounted) {
+          Navigator.of(context, rootNavigator: true)
+              .popUntil((route) => route.isFirst);
+          Navigator.pushReplacementNamed(context, '/job_list');
+        }
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _usernameOrPhoneController.dispose();
     _passwordController.dispose();
@@ -109,6 +125,39 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> _logout() async {
+    await Supabase.instance.client.auth.signOut();
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true)
+          .popUntil((route) => route.isFirst);
+      Navigator.pushReplacementNamed(
+          context, '/'); // Assuming '/' is your main home route
+    }
+  }
+
+  Future<void> _confirmAndLogout() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await _logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,6 +176,11 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             child: Text('EN | LG',
                 style: GoogleFonts.montserrat(color: Colors.black)),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _confirmAndLogout,
+            tooltip: 'Logout',
           ),
         ],
       ),

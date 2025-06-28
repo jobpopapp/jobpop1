@@ -41,11 +41,24 @@ class _JobPopMainLayoutState extends State<JobPopMainLayout> {
     });
   }
 
-  final List<Widget> pages = [
-    ProfileScreen(),
-    JobListScreen(),
-    Center(child: Text('Logging out...')), // Placeholder action
-  ];
+  List<Widget> get pages => [
+        ProfileScreen(
+          username:
+              userProfile?['full_name'] ?? userProfile?['username'] ?? 'User',
+          userEmail: userProfile?['email'] ?? '',
+          userPhone: userProfile?['phone'] ?? '',
+          profilePhotoUrl: userProfile?['avatar_url'] ??
+              userProfile?['profile_photo_url'] ??
+              '',
+          preferredLanguage: userProfile?['preferred_language'] ?? 'English',
+          onToggleLanguage: () {
+            // TODO: Implement language toggle logic
+          },
+          onLogout: showLogoutConfirmation,
+        ),
+        JobListScreen(),
+        Center(child: Text('Logging out...')),
+      ];
 
   void onItemTapped(int index) {
     if (index == 2) {
@@ -105,18 +118,28 @@ class _JobPopMainLayoutState extends State<JobPopMainLayout> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
-    final avatar = userProfile?['avatar_url'] ?? 'assets/avatar.png';
-    final name = userProfile?['full_name'] ?? 'User';
+    final avatar =
+        userProfile?['avatar_url'] ?? userProfile?['profile_photo_url'] ?? '';
+    final name =
+        userProfile?['full_name'] ?? userProfile?['username'] ?? 'User';
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.yellow[100],
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundImage: AssetImage(avatar),
-            ),
+            if (avatar != null && avatar.isNotEmpty)
+              CircleAvatar(
+                radius: 18,
+                backgroundImage: NetworkImage(avatar),
+                backgroundColor: Colors.grey[200],
+              )
+            else
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.grey[300],
+                child: Icon(Icons.person, color: Colors.white),
+              ),
             const SizedBox(width: 12),
             Text(
               name,
@@ -137,6 +160,7 @@ class _JobPopMainLayoutState extends State<JobPopMainLayout> {
       ),
       body: pages[selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: selectedIndex,
         onTap: onItemTapped,
         backgroundColor: Colors.white,

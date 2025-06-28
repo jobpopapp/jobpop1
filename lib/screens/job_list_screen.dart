@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class JobListScreen extends StatefulWidget {
   const JobListScreen({super.key});
@@ -32,13 +33,33 @@ class _JobListScreenState extends State<JobListScreen> {
           .eq('id', user.id)
           .maybeSingle();
       setState(() {
-        username = profile?['username'] ?? 'User';
-        userEmail = profile?['email'] ?? '';
-        userPhone = profile?['phone'] ?? '';
-        // Prefer Google avatar if available, else use profile table
+        // Prefer Google Auth metadata if available, else fallback to profiles table
+        username = user.userMetadata?['full_name'] ??
+            user.userMetadata?['name'] ??
+            profile?['username'] ??
+            'User';
+        userEmail = user.userMetadata?['email'] ?? profile?['email'] ?? '';
+        userPhone = user.userMetadata?['phone'] ?? profile?['phone'] ?? '';
         profilePhotoUrl =
             user.userMetadata?['avatar_url'] ?? profile?['profile_photo_url'];
       });
+    } else {
+      // Phone-only login: get id/username/phone from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final phone = prefs.getString('phone_login');
+      if (phone != null && phone.isNotEmpty) {
+        final profile = await supabase
+            .from('profiles')
+            .select()
+            .eq('phone', phone)
+            .maybeSingle();
+        setState(() {
+          username = profile?['username'] ?? 'User';
+          userEmail = profile?['email'] ?? '';
+          userPhone = profile?['phone'] ?? '';
+          profilePhotoUrl = profile?['profile_photo_url'];
+        });
+      }
     }
   }
 
@@ -67,6 +88,8 @@ class _JobListScreenState extends State<JobListScreen> {
 
   Future<void> _logout() async {
     await supabase.auth.signOut();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('phone_login');
     if (mounted) {
       Navigator.of(context, rootNavigator: true)
           .popUntil((route) => route.isFirst);

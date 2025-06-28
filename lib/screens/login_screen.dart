@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show OAuthProvider;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/password_hash.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -90,8 +91,10 @@ class _LoginScreenState extends State<LoginScreen> {
         _showErrorDialog('Incorrect password.');
         return;
       }
-      // Success: Set Supabase session manually for phone-only users
-      // Optionally, you can use a custom JWT or just allow access since you control navigation
+      // Save phone to SharedPreferences for phone-only login
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('phone_login', profile['phone'] ?? input);
+      // Success: Set Supabase session manually for phone-only users (if needed)
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
         Navigator.pushReplacementNamed(context, '/job_list');

@@ -118,7 +118,7 @@ class _JobListScreenState extends State<JobListScreen> {
                       userEmail!,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
-                        color: Colors.grey[700],
+                        color: const Color.fromARGB(255, 122, 0, 0),
                       ),
                     ),
                   if (userPhone != null && userPhone!.isNotEmpty)
@@ -126,7 +126,7 @@ class _JobListScreenState extends State<JobListScreen> {
                       userPhone!,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
-                        color: Colors.grey[700],
+                        color: const Color.fromARGB(255, 105, 0, 0),
                       ),
                     ),
                 ],
@@ -158,7 +158,7 @@ class _JobListScreenState extends State<JobListScreen> {
               decoration: InputDecoration(
                 labelText: 'Choose location',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(5),
                 ),
               ),
               items: const [
@@ -180,7 +180,7 @@ class _JobListScreenState extends State<JobListScreen> {
               decoration: InputDecoration(
                 labelText: 'Job Category *',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(5),
                 ),
               ),
               items: [

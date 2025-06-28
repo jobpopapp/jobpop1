@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show OAuthProvider;
+import '../utils/password_hash.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback? onToggleLanguage;
@@ -47,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
         OAuthProvider.google,
         redirectTo: 'https://jobpop.web.app/#/login',
       );
+      // The onAuthStateChange listener in initState will handle navigation after sign-in
     } catch (error) {
       print('Google sign-in failed: $error');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,14 +84,14 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
       // Check password (hash and compare)
-      final hashedInput =
-          password; // TODO: hashPassword(password) if used in signup
+      final hashedInput = hashPassword(password); // Use the same hash as signup
       if (profile['password'] != hashedInput) {
         Navigator.of(context, rootNavigator: true).pop();
         _showErrorDialog('Incorrect password.');
         return;
       }
-      // Success: Navigate to job list
+      // Success: Set Supabase session manually for phone-only users
+      // Optionally, you can use a custom JWT or just allow access since you control navigation
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
         Navigator.pushReplacementNamed(context, '/job_list');

@@ -11,27 +11,66 @@ class JobListScreen extends StatefulWidget {
 
 class _JobListScreenState extends State<JobListScreen> {
   final supabase = Supabase.instance.client;
-  String username = 'Loading...';
-  int newJobsCount = 3; // Replace with dynamic Supabase query as needed
+  String username = '';
+  String? userEmail;
+  String? userPhone;
+  String? profilePhotoUrl;
+  int newJobsCount = 3; // Replace with actual logic if needed
 
   @override
   void initState() {
     super.initState();
-    fetchUserName();
-    // fetchNewJobsCount(); // Optional: implement job counting logic
+    fetchUserProfile();
   }
 
-  Future<void> fetchUserName() async {
+  Future<void> fetchUserProfile() async {
     final user = supabase.auth.currentUser;
     if (user != null) {
-      final response = await supabase
-          .from('users')
-          .select('name')
+      final profile = await supabase
+          .from('profiles')
+          .select()
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
       setState(() {
-        username = response['name'] ?? 'User';
+        username = profile?['username'] ?? 'User';
+        userEmail = profile?['email'] ?? '';
+        userPhone = profile?['phone'] ?? '';
+        // Prefer Google avatar if available, else use profile table
+        profilePhotoUrl =
+            user.userMetadata?['avatar_url'] ?? profile?['profile_photo_url'];
       });
+    }
+  }
+
+  Future<void> _confirmAndLogout() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await _logout();
+    }
+  }
+
+  Future<void> _logout() async {
+    await supabase.auth.signOut();
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true)
+          .popUntil((route) => route.isFirst);
+      Navigator.pushReplacementNamed(context, '/');
     }
   }
 
@@ -40,39 +79,87 @@ class _JobListScreenState extends State<JobListScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         titleSpacing: 16,
-        title: Text(
-          username,
-          style: GoogleFonts.montserrat(
-              color: Colors.black, fontWeight: FontWeight.bold),
+        backgroundColor: const Color(0xFFFFD23F), // Yellowish
+        elevation: 0,
+        title: Row(
+          children: [
+            if (profilePhotoUrl != null && profilePhotoUrl!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundImage: NetworkImage(profilePhotoUrl!),
+                  backgroundColor: Colors.grey[200],
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.grey[300],
+                  child: Icon(Icons.person, color: Colors.white),
+                ),
+              ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    username.isNotEmpty ? username : 'User',
+                    style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  if (userEmail != null && userEmail!.isNotEmpty)
+                    Text(
+                      userEmail!,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  if (userPhone != null && userPhone!.isNotEmpty)
+                    Text(
+                      userPhone!,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
+            onPressed: _confirmAndLogout,
             icon: const Icon(Icons.logout, color: Colors.red),
-            onPressed: () {
-              // TODO: logout logic
-            },
+            tooltip: 'Logout',
           ),
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Find a job anywhere',
                 style: GoogleFonts.montserrat(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black)),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                )),
             const SizedBox(height: 24),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: 'Choose Country (Optional)',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                labelText: 'Choose location',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               items: const [
                 DropdownMenuItem(value: 'Uganda', child: Text('Uganda')),
@@ -80,17 +167,52 @@ class _JobListScreenState extends State<JobListScreen> {
               ],
               onChanged: (value) {},
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Please select a job category',
+                style: TextStyle(color: Color(0xFFD62828)),
+              ),
+            ),
+            const SizedBox(height: 4),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Job Category *',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              items: const [
-                DropdownMenuItem(value: 'Education', child: Text('Education')),
-                DropdownMenuItem(value: 'Health', child: Text('Health')),
-                DropdownMenuItem(value: 'Other', child: Text('Other')),
+              items: [
+                _buildDropdownMenuItem('Domestic Work',
+                    'Domestic Work (Housekeeping, Nanny, Maid)'),
+                _buildDropdownMenuItem('Construction & Manual Labor',
+                    'Construction & Manual Labor'),
+                _buildDropdownMenuItem(
+                    'Security Services', 'Security Services (Guard, Bouncer)'),
+                _buildDropdownMenuItem('Driving & Transport',
+                    'Driving & Transport (Driver, Rider, Conductor)'),
+                _buildDropdownMenuItem('Hospitality & Tourism',
+                    'Hospitality & Tourism (Waiter, Chef, Hotel Staff)'),
+                _buildDropdownMenuItem(
+                    'Healthcare & Nursing', 'Healthcare & Nursing'),
+                _buildDropdownMenuItem(
+                    'Education & Teaching', 'Education & Teaching'),
+                _buildDropdownMenuItem('Sales & Retail',
+                    'Sales & Retail (Shop Attendant, Cashier)'),
+                _buildDropdownMenuItem(
+                    'Agriculture & Farming', 'Agriculture & Farming'),
+                _buildDropdownMenuItem(
+                    'Cleaning & Maintenance', 'Cleaning & Maintenance'),
+                _buildDropdownMenuItem('IT & Technical',
+                    'IT & Technical (Computer, Telecom, Engineering)'),
+                _buildDropdownMenuItem(
+                    'Office & Administration', 'Office & Administration'),
+                _buildDropdownMenuItem('Beauty & Personal Care',
+                    'Beauty & Personal Care (Salon, Barber, Spa)'),
+                _buildDropdownMenuItem('Artisan & Skilled Trades',
+                    'Artisan & Skilled Trades (Tailor, Carpenter, Mechanic)'),
+                _buildDropdownMenuItem('Other', 'Other'),
               ],
               onChanged: (value) {},
             ),
@@ -98,30 +220,32 @@ class _JobListScreenState extends State<JobListScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                onPressed: () {
+                  // Trigger job search
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                onPressed: () {
-                  // TODO: trigger job search
-                },
                 child: Text('SEARCH',
                     style: GoogleFonts.montserrat(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                        fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.amber[800],
-        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
         currentIndex: 1,
         onTap: (index) {
-          // TODO: Handle tab switching
+          // Handle navigation between tabs
         },
+        selectedItemColor: Colors.amber[800],
+        unselectedItemColor: Colors.grey,
         items: [
           const BottomNavigationBarItem(
               icon: Icon(Icons.person), label: 'Profile'),
@@ -134,11 +258,12 @@ class _JobListScreenState extends State<JobListScreen> {
                 if (newJobsCount > 0)
                   Positioned(
                     right: 0,
+                    top: 1,
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
-                        color: Color(0xFFD62828),
                         shape: BoxShape.circle,
+                        color: Color(0xFFD62828),
                       ),
                       child: Text(
                         '$newJobsCount',
@@ -155,6 +280,22 @@ class _JobListScreenState extends State<JobListScreen> {
             label: 'Alerts',
           ),
         ],
+      ),
+    );
+  }
+
+  // Helper for dropdown items with bottom border
+  DropdownMenuItem<String> _buildDropdownMenuItem(String value, String label) {
+    return DropdownMenuItem(
+      value: value,
+      child: Container(
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Colors.grey, width: 0.5),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(label, style: const TextStyle(fontSize: 12)),
       ),
     );
   }

@@ -180,9 +180,19 @@ class _JobListScreenState extends State<JobListScreen> {
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Choose location',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
+                labelStyle: GoogleFonts.montserrat(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
                 ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              style: GoogleFonts.montserrat(
+                color: Colors.black,
+                fontSize: 16,
               ),
               items: const [
                 DropdownMenuItem(value: 'Uganda', child: Text('Uganda')),
@@ -203,39 +213,73 @@ class _JobListScreenState extends State<JobListScreen> {
               decoration: InputDecoration(
                 labelText: 'Job Category *',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              items: [
-                _buildDropdownMenuItem('Domestic Work',
-                    'Domestic Work (Housekeeping, Nanny, Maid)'),
-                _buildDropdownMenuItem('Construction & Manual Labor',
-                    'Construction & Manual Labor'),
-                _buildDropdownMenuItem(
-                    'Security Services', 'Security Services (Guard, Bouncer)'),
-                _buildDropdownMenuItem('Driving & Transport',
-                    'Driving & Transport (Driver, Rider, Conductor)'),
-                _buildDropdownMenuItem('Hospitality & Tourism',
-                    'Hospitality & Tourism (Waiter, Chef, Hotel Staff)'),
-                _buildDropdownMenuItem(
-                    'Healthcare & Nursing', 'Healthcare & Nursing'),
-                _buildDropdownMenuItem(
-                    'Education & Teaching', 'Education & Teaching'),
-                _buildDropdownMenuItem('Sales & Retail',
-                    'Sales & Retail (Shop Attendant, Cashier)'),
-                _buildDropdownMenuItem(
-                    'Agriculture & Farming', 'Agriculture & Farming'),
-                _buildDropdownMenuItem(
-                    'Cleaning & Maintenance', 'Cleaning & Maintenance'),
-                _buildDropdownMenuItem('IT & Technical',
-                    'IT & Technical (Computer, Telecom, Engineering)'),
-                _buildDropdownMenuItem(
-                    'Office & Administration', 'Office & Administration'),
-                _buildDropdownMenuItem('Beauty & Personal Care',
-                    'Beauty & Personal Care (Salon, Barber, Spa)'),
-                _buildDropdownMenuItem('Artisan & Skilled Trades',
-                    'Artisan & Skilled Trades (Tailor, Carpenter, Mechanic)'),
-                _buildDropdownMenuItem('Other', 'Other'),
+              items: const [
+                DropdownMenuItem(
+                    value: 'Domestic Work',
+                    child: Text('Domestic Work (Housekeeping, Nanny, Maid)',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Construction & Manual Labor',
+                    child: Text('Construction & Manual Labor',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Security Services',
+                    child: Text('Security Services (Guard, Bouncer)',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Driving & Transport',
+                    child: Text(
+                        'Driving & Transport (Driver, Rider, Conductor)',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Hospitality & Tourism',
+                    child: Text(
+                        'Hospitality & Tourism (Waiter, Chef, Hotel Staff)',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Healthcare & Nursing',
+                    child: Text('Healthcare & Nursing',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Education & Teaching',
+                    child: Text('Education & Teaching',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Sales & Retail',
+                    child: Text('Sales & Retail (Shop Attendant, Cashier)',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Agriculture & Farming',
+                    child: Text('Agriculture & Farming',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Cleaning & Maintenance',
+                    child: Text('Cleaning & Maintenance',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'IT & Technical',
+                    child: Text(
+                        'IT & Technical (Computer, Telecom, Engineering)',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Office & Administration',
+                    child: Text('Office & Administration',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Beauty & Personal Care',
+                    child: Text('Beauty & Personal Care (Salon, Barber, Spa)',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Artisan & Skilled Trades',
+                    child: Text(
+                        'Artisan & Skilled Trades (Tailor, Carpenter, Mechanic)',
+                        style: TextStyle(fontSize: 12))),
+                DropdownMenuItem(
+                    value: 'Other',
+                    child: Text('Other', style: TextStyle(fontSize: 12))),
               ],
               onChanged: (value) {},
             ),

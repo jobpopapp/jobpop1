@@ -178,6 +178,7 @@ class _JobListScreenState extends State<JobListScreen> {
                 )),
             const SizedBox(height: 24),
             DropdownButtonFormField<String>(
+              value: 'Abroad',
               decoration: InputDecoration(
                 labelText: 'Choose location',
                 labelStyle: GoogleFonts.montserrat(

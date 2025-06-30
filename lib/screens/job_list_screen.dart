@@ -17,6 +17,7 @@ class _JobListScreenState extends State<JobListScreen> {
   String? userPhone;
   String? profilePhotoUrl;
   int newJobsCount = 3; // Replace with actual logic if needed
+  int _selectedIndex = 1;
 
   @override
   void initState() {
@@ -103,7 +104,7 @@ class _JobListScreenState extends State<JobListScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         titleSpacing: 16,
-        backgroundColor: const Color(0xFFFFD23F), // Yellowish
+        backgroundColor: const Color(0xFFFFD23F),
         elevation: 0,
         title: Row(
           children: [
@@ -308,45 +309,25 @@ class _JobListScreenState extends State<JobListScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: 1,
+        currentIndex: _selectedIndex,
         onTap: (index) {
-          // Handle navigation between tabs
+          setState(() {
+            _selectedIndex = index;
+          });
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/profile');
+          } else if (index == 1) {
+            // Already on jobs
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, '/saved-jobs');
+          }
         },
         selectedItemColor: Colors.amber[800],
         unselectedItemColor: Colors.grey,
-        items: [
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.person), label: 'Profile'),
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.search), label: 'Jobs'),
-          BottomNavigationBarItem(
-            icon: Stack(
-              children: [
-                const Icon(Icons.notifications_none),
-                if (newJobsCount > 0)
-                  Positioned(
-                    right: 0,
-                    top: 1,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFD62828),
-                      ),
-                      child: Text(
-                        '$newJobsCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            label: 'Alerts',
-          ),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Jobs'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
         ],
       ),
     );

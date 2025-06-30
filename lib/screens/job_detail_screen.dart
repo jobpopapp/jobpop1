@@ -6,6 +6,22 @@ class JobDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Example job data (replace with real data from Supabase)
+    final job = {
+      'title': 'Housekeeper',
+      'category': 'Domestic Work',
+      'country': 'Uganda',
+      'salary': 'UGX 400,000',
+      'deadline': '2025-07-15',
+      'company': 'Kampala Homes',
+      'description': 'Responsible for cleaning and maintaining the house.',
+      'requirements': 'Cleaning, Organization, Honesty',
+      'email': 'hr@kampalahomes.com',
+      'company_website': 'https://kampalahomes.com',
+      'application_link': 'https://kampalahomes.com/apply',
+      'contact_phone': '+256 700 000000',
+    };
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -25,14 +41,17 @@ class JobDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(24.0),
         child: ListView(
           children: [
-            Text('Job Title',
+            Text(job['title'] ?? '',
                 style: GoogleFonts.montserrat(
                     fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text('Category: Education', style: GoogleFonts.montserrat()),
-            Text('Country: Uganda', style: GoogleFonts.montserrat()),
-            Text('Salary: UGX 1,000,000', style: GoogleFonts.montserrat()),
-            Text('Deadline: 2025-07-01', style: GoogleFonts.montserrat()),
+            Text('Company: ${job['company']}', style: GoogleFonts.montserrat()),
+            Text('Category: ${job['category']}',
+                style: GoogleFonts.montserrat()),
+            Text('Country: ${job['country']}', style: GoogleFonts.montserrat()),
+            Text('Salary: ${job['salary']}', style: GoogleFonts.montserrat()),
+            Text('Deadline: ${job['deadline']}',
+                style: GoogleFonts.montserrat()),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -43,64 +62,92 @@ class JobDetailScreen extends StatelessWidget {
                     color: const Color(0xFFFFD23F),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text('Posted by: Agency Name',
+                  child: Text('Posted by: ${job['company']}',
                       style:
                           GoogleFonts.montserrat(fontWeight: FontWeight.w500)),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text('Foreign Employer',
-                      style: GoogleFonts.montserrat(color: Colors.white)),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Text(
-                'Full job description goes here. This is a placeholder for the job details.',
-                style: GoogleFonts.montserrat()),
-            const SizedBox(height: 24),
-            Text('Contact Info:',
+            Text('Job Description',
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.email, color: Colors.black),
-                const SizedBox(width: 8),
-                Text('hr@company.com', style: GoogleFonts.montserrat()),
-              ],
-            ),
-            Row(
-              children: [
-                Icon(Icons.phone, color: Colors.black),
-                const SizedBox(width: 8),
-                Text('+256 700 000000', style: GoogleFonts.montserrat()),
-              ],
-            ),
-            Row(
-              children: [
-                Icon(Icons.message,
-                    color: Colors.green), // WhatsApp placeholder
-                const SizedBox(width: 8),
-                Text('+256 700 000000', style: GoogleFonts.montserrat()),
-              ],
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD62828),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                minimumSize: const Size.fromHeight(48),
+            Text(job['description'] ?? '', style: GoogleFonts.montserrat()),
+            const SizedBox(height: 16),
+            Text('Requirements',
+                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
+            Text(job['requirements'] ?? '', style: GoogleFonts.montserrat()),
+            const SizedBox(height: 16),
+            if ((job['application_link'] ?? '').isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => JobApplyScreen(job: job),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD62828),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                  child: Text('How to Apply',
+                      style: GoogleFonts.montserrat(fontSize: 18)),
+                ),
               ),
-              child: Text('Apply', style: GoogleFonts.montserrat(fontSize: 18)),
-            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class JobApplyScreen extends StatelessWidget {
+  final Map<String, String> job;
+  const JobApplyScreen({super.key, required this.job});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text('How to Apply',
+            style: GoogleFonts.montserrat(
+                color: Colors.black, fontWeight: FontWeight.bold)),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: ListView(
+          children: [
+            Text('Hiring Company:',
+                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
+            Text(job['company'] ?? '', style: GoogleFonts.montserrat()),
+            const SizedBox(height: 8),
+            Text('Deadline:',
+                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
+            Text(job['deadline'] ?? '', style: GoogleFonts.montserrat()),
+            const SizedBox(height: 8),
+            Text('Requirements:',
+                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
+            Text(job['requirements'] ?? '', style: GoogleFonts.montserrat()),
+            const SizedBox(height: 8),
+            if ((job['email'] ?? '').isNotEmpty)
+              Text('Email: ${job['email']}', style: GoogleFonts.montserrat()),
+            if ((job['company_website'] ?? '').isNotEmpty)
+              Text('Website: ${job['company_website']}',
+                  style: GoogleFonts.montserrat()),
+            if ((job['application_link'] ?? '').isNotEmpty)
+              Text('Application Link: ${job['application_link']}',
+                  style: GoogleFonts.montserrat()),
+            if ((job['contact_phone'] ?? '').isNotEmpty)
+              Text('Contact Phone: ${job['contact_phone']}',
+                  style: GoogleFonts.montserrat()),
           ],
         ),
       ),

@@ -2,71 +2,76 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SavedJobsScreen extends StatelessWidget {
-  const SavedJobsScreen({super.key});
+  const SavedJobsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Replace with real saved jobs from Supabase
+    final List<Map<String, String>> savedJobs = [
+      {
+        'title': 'Housekeeper',
+        'company': 'Kampala Homes',
+        'salary': 'UGX 400,000',
+        'country': 'Uganda',
+        'deadline': '2025-07-15',
+      },
+      {
+        'title': 'Driver',
+        'company': 'Safe Transport',
+        'salary': 'UGX 600,000',
+        'country': 'Uganda',
+        'deadline': '2025-07-20',
+      },
+    ];
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFFD23F),
         elevation: 0,
         title: Text('Saved Jobs',
             style: GoogleFonts.montserrat(
-                color: Colors.black, fontWeight: FontWeight.bold)),
+                fontWeight: FontWeight.bold, color: Colors.black)),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: 3,
-          itemBuilder: (context, index) {
-            final isExpired = index == 2;
-            return Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              margin: const EdgeInsets.only(bottom: 16),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: savedJobs.isEmpty
+          ? Center(
+              child: Text('No saved jobs yet.',
+                  style: GoogleFonts.montserrat(fontSize: 16)),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: savedJobs.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final job = savedJobs[index];
+                return Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: ListTile(
+                    title: Text(job['title'] ?? '',
+                        style: GoogleFonts.montserrat(
+                            fontWeight: FontWeight.bold)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Job Title $index',
+                        Text(job['company'] ?? '',
+                            style: GoogleFonts.montserrat()),
+                        Text('Salary: ${job['salary']}',
+                            style: GoogleFonts.montserrat(fontSize: 12)),
+                        Text('Country: ${job['country']}',
+                            style: GoogleFonts.montserrat(fontSize: 12)),
+                        Text('Deadline: ${job['deadline']}',
                             style: GoogleFonts.montserrat(
-                                fontWeight: FontWeight.bold, fontSize: 18)),
-                        if (isExpired)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text('Expired',
-                                style: GoogleFonts.montserrat(
-                                    color: Colors.white)),
-                          ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () {},
-                        ),
+                                fontSize: 12, color: Colors.red)),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text('Salary: UGX 1,000,000',
-                        style: GoogleFonts.montserrat()),
-                    Text('Country: Uganda', style: GoogleFonts.montserrat()),
-                    Text('Deadline: 2025-07-01',
-                        style: GoogleFonts.montserrat()),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+                    trailing: Icon(Icons.bookmark, color: Colors.amber[800]),
+                    onTap: () {
+                      // TODO: Navigate to job detail
+                    },
+                  ),
+                );
+              },
+            ),
     );
   }
 }

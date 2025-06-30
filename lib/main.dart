@@ -9,6 +9,7 @@ import 'screens/signup_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/job_list_screen.dart';
 import 'screens/job_detail_screen.dart';
+import 'screens/saved_jobs_screen.dart';
 
 import 'screens/profile_screen.dart';
 

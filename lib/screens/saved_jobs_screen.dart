@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SavedJobsScreen extends StatelessWidget {
+class SavedJobsScreen extends StatefulWidget {
   const SavedJobsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SavedJobsScreen> createState() => _SavedJobsScreenState();
+}
+
+class _SavedJobsScreenState extends State<SavedJobsScreen> {
+  int _selectedIndex = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +31,79 @@ class SavedJobsScreen extends StatelessWidget {
       },
     ];
 
+    // Mock user info for AppBar (replace with real user data if available)
+    final String username = 'User';
+    final String? userEmail = '';
+    final String? userPhone = '';
+    final String? profilePhotoUrl = null;
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        titleSpacing: 16,
         backgroundColor: const Color(0xFFFFD23F),
         elevation: 0,
-        title: Text('Saved Jobs',
-            style: GoogleFonts.montserrat(
-                fontWeight: FontWeight.bold, color: Colors.black)),
+        title: Row(
+          children: [
+            if (profilePhotoUrl != null && profilePhotoUrl.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundImage: NetworkImage(profilePhotoUrl),
+                  backgroundColor: Colors.grey[200],
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.grey[300],
+                  child: Icon(Icons.person, color: Colors.white),
+                ),
+              ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    username.isNotEmpty ? username : 'User',
+                    style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  if (userEmail != null && userEmail.isNotEmpty)
+                    Text(
+                      userEmail,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        color: Color.fromARGB(255, 122, 0, 0),
+                      ),
+                    ),
+                  if (userPhone != null && userPhone.isNotEmpty)
+                    Text(
+                      userPhone,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        color: Color.fromARGB(255, 105, 0, 0),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // TODO: Add logout logic if needed
+            },
+            icon: const Icon(Icons.logout, color: Colors.red),
+            tooltip: 'Logout',
+          ),
+        ],
       ),
       body: savedJobs.isEmpty
           ? Center(
@@ -40,7 +113,7 @@ class SavedJobsScreen extends StatelessWidget {
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: savedJobs.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final job = savedJobs[index];
                 return Card(
@@ -72,6 +145,29 @@ class SavedJobsScreen extends StatelessWidget {
                 );
               },
             ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/profile');
+          } else if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/job_list');
+          } else if (index == 2) {
+            // Already on saved jobs
+          }
+        },
+        selectedItemColor: Colors.amber[800],
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Jobs'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
+        ],
+      ),
     );
   }
 }

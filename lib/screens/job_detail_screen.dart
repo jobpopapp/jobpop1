@@ -6,21 +6,27 @@ class JobDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Example job data (replace with real data from Supabase)
-    final job = {
-      'title': 'Housekeeper',
-      'category': 'Domestic Work',
-      'country': 'Uganda',
-      'salary': 'UGX 400,000',
-      'deadline': '2025-07-15',
-      'company': 'Kampala Homes',
-      'description': 'Responsible for cleaning and maintaining the house.',
-      'requirements': 'Cleaning, Organization, Honesty',
-      'email': 'hr@kampalahomes.com',
-      'company_website': 'https://kampalahomes.com',
-      'application_link': 'https://kampalahomes.com/apply',
-      'contact_phone': '+256 700 000000',
-    };
+    // Get job data from arguments if available
+    final dynamic args = ModalRoute.of(context)?.settings.arguments;
+    Map<String, dynamic> job;
+    if (args != null && args is Map<String, dynamic>) {
+      job = args;
+    } else {
+      job = {
+        'title': 'Housekeeper',
+        'category': 'Domestic Work',
+        'country': 'Uganda',
+        'salary': 'UGX 400,000',
+        'deadline': '2025-07-15',
+        'company': 'Kampala Homes',
+        'description': 'Responsible for cleaning and maintaining the house.',
+        'requirements': 'Cleaning, Organization, Honesty',
+        'email': 'hr@kampalahomes.com',
+        'company_website': 'https://kampalahomes.com',
+        'application_link': 'https://kampalahomes.com/apply',
+        'contact_phone': '+256 700 000000',
+      };
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -85,7 +91,9 @@ class JobDetailScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => JobApplyScreen(job: job),
+                        builder: (context) => JobApplyScreen(
+                            job: job.map(
+                                (k, v) => MapEntry(k, v?.toString() ?? ''))),
                       ),
                     );
                   },

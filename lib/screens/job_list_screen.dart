@@ -304,6 +304,57 @@ class _JobListScreenState extends State<JobListScreen> {
                         fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.only(top: 0),
+                itemCount: 5, // Replace with jobs.length when using real data
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  // Example job data
+                  final job = {
+                    'title': 'Job Title $index',
+                    'company': 'Company $index',
+                    'salary': 'UGX ${400000 + index * 100000}',
+                    'country': 'Uganda',
+                    'deadline': '2025-07-${15 + index}',
+                  };
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    child: ListTile(
+                      title: Text(job['title'] ?? '',
+                          style: GoogleFonts.montserrat(
+                              fontWeight: FontWeight.bold)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(job['company'] ?? '',
+                              style: GoogleFonts.montserrat()),
+                          Text('Salary: ${job['salary']}',
+                              style: GoogleFonts.montserrat(fontSize: 12)),
+                          Text('Country: ${job['country']}',
+                              style: GoogleFonts.montserrat(fontSize: 12)),
+                          Text('Deadline: ${job['deadline']}',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 12, color: Colors.red)),
+                        ],
+                      ),
+                      trailing:
+                          Icon(Icons.bookmark_border, color: Colors.amber[800]),
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/job-detail',
+                          arguments: job,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -317,7 +368,7 @@ class _JobListScreenState extends State<JobListScreen> {
           if (index == 0) {
             Navigator.pushReplacementNamed(context, '/profile');
           } else if (index == 1) {
-            // Already on jobs
+            Navigator.pushReplacementNamed(context, '/job_list');
           } else if (index == 2) {
             Navigator.pushReplacementNamed(context, '/saved-jobs');
           }

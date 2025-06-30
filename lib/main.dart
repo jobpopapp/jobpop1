@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/job_list_screen.dart';
 import 'screens/job_detail_screen.dart';
-import 'screens/saved_jobs_screen.dart';
+
 import 'screens/profile_screen.dart';
+
+import 'dart:ui';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,10 +24,38 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale? _locale;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocale();
+  }
+
+  Future<void> _loadLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final code = prefs.getString('locale') ?? 'en';
+    setState(() {
+      _locale = Locale(code);
+    });
+  }
+
+  void setLocale(Locale locale) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('locale', locale.languageCode);
+    setState(() {
+      _locale = locale;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -60,7 +93,18 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MyHomePage(title: 'Job Pop'),
+      locale: _locale,
+      supportedLocales: const [
+        Locale('en'),
+        Locale('lg'),
+      ],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: MyHomePage(title: 'Job Pop', onLocaleChanged: setLocale),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
@@ -69,25 +113,48 @@ class MyApp extends StatelessWidget {
         '/job-detail': (context) => const JobDetailScreen(),
         '/saved-jobs': (context) => const SavedJobsScreen(),
         '/profile': (context) => const ProfileScreen(),
-        '/job_list': (context) =>
-            const JobListScreen(), // Added for phone-only signup
+        '/job_list': (context) => const JobListScreen(),
       },
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
   final String title;
+  final void Function(Locale) onLocaleChanged;
+  const MyHomePage(
+      {super.key, required this.title, required this.onLocaleChanged});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String _selectedLang = 'en';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLang();
+  }
+
+  Future<void> _loadLang() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedLang = prefs.getString('locale') ?? 'en';
+    });
+  }
+
+  void _onLangChanged(String lang) {
+    setState(() {
+      _selectedLang = lang;
+    });
+    widget.onLocaleChanged(Locale(lang));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -122,12 +189,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Find a job',
+                      text: loc.findAJobAnywhere,
                       style: const TextStyle(color: Colors.white),
-                    ),
-                    TextSpan(
-                      text: ' or Hire',
-                      style: const TextStyle(color: Color(0xFFD62828)),
                     ),
                   ],
                 ),
@@ -147,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 child: Text(
-                  'LOGIN',
+                  loc.login,
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -160,19 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.pushNamed(context, '/signup');
                 },
                 child: Text(
-                  'Create new user account ?',
-                  style: GoogleFonts.montserrat(
-                    color: Colors.blueAccent,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Add navigation if needed
-                },
-                child: Text(
-                  'Create new company account ?',
+                  loc.signup,
                   style: GoogleFonts.montserrat(
                     color: Colors.blueAccent,
                     decoration: TextDecoration.underline,
@@ -183,11 +234,10 @@ class _MyHomePageState extends State<MyHomePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Checkbox(
-                    value: false,
-                    onChanged: (_) {},
-                    side: const BorderSide(color: Colors.white),
-                    checkColor: Colors.black,
+                  Radio<String>(
+                    value: 'lg',
+                    groupValue: _selectedLang,
+                    onChanged: (val) => _onLangChanged(val!),
                     activeColor: Colors.white,
                   ),
                   Text(
@@ -195,11 +245,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: GoogleFonts.montserrat(color: Colors.white),
                   ),
                   const SizedBox(width: 20),
-                  Checkbox(
-                    value: true,
-                    onChanged: (_) {},
-                    side: const BorderSide(color: Colors.white),
-                    checkColor: Colors.black,
+                  Radio<String>(
+                    value: 'en',
+                    groupValue: _selectedLang,
+                    onChanged: (val) => _onLangChanged(val!),
                     activeColor: Colors.white,
                   ),
                   Text(

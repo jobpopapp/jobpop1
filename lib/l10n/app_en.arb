@@ -1,0 +1,13 @@
+{
+  "appTitle": "Job Pop",
+  "login": "Login",
+  "signup": "Sign Up",
+  "chooseLanguage": "Choose Language",
+  "profile": "Profile",
+  "logout": "Logout",
+  "findAJobAnywhere": "Find a job anywhere",
+  "chooseLocation": "Choose location",
+  "pleaseSelectJobCategory": "Please select a job category",
+  "jobCategory": "Job Category *",
+  "search": "SEARCH"
+}

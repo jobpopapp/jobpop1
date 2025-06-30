@@ -18,11 +18,16 @@ class _JobListScreenState extends State<JobListScreen> {
   String? profilePhotoUrl;
   int newJobsCount = 3; // Replace with actual logic if needed
   int _selectedIndex = 1;
+  List<Map<String, dynamic>> jobs = [];
+  bool isLoading = true;
+  String _selectedLocation = 'Abroad';
+  String? _selectedCategory;
 
   @override
   void initState() {
     super.initState();
     fetchUserProfile();
+    fetchJobs();
   }
 
   Future<void> fetchUserProfile() async {
@@ -96,6 +101,67 @@ class _JobListScreenState extends State<JobListScreen> {
           .popUntil((route) => route.isFirst);
       Navigator.pushReplacementNamed(context, '/');
     }
+  }
+
+  Future<void> fetchJobs() async {
+    setState(() {
+      isLoading = true;
+    });
+    debugPrint('fetchJobs() called');
+    try {
+      debugPrint('Fetching jobs...');
+      debugPrint('Selected location: $_selectedLocation');
+      debugPrint('Selected category: $_selectedCategory');
+      var query =
+          supabase.from('jobs').select().order('deadline', ascending: true);
+      bool filterAbroadClientSide = false;
+      if (_selectedLocation == 'Uganda') {
+        debugPrint('Applying filter: country == Uganda');
+        query = (query as dynamic).eq('country', 'Uganda');
+      } else if (_selectedLocation == 'Abroad') {
+        debugPrint(
+            'Applying filter: country != Uganda (client-side for web and all platforms)');
+        filterAbroadClientSide = true;
+        // Do not add any country filter to the query
+      }
+      if (_selectedCategory != null && _selectedCategory!.isNotEmpty) {
+        debugPrint('Applying filter: category == $_selectedCategory');
+        query = (query as dynamic).eq('category', _selectedCategory);
+      }
+      final response = await query;
+      debugPrint('Supabase response: ${response.runtimeType} $response');
+      if (response is List) {
+        List<Map<String, dynamic>> result =
+            List<Map<String, dynamic>>.from(response);
+        if (filterAbroadClientSide) {
+          debugPrint(
+              'Filtering out jobs with country == Uganda (client-side abroad filter)');
+          result = result
+              .where((job) =>
+                  (job['country'] ?? '').toString().trim().toLowerCase() !=
+                  'uganda')
+              .toList();
+        }
+        setState(() {
+          jobs = result;
+          isLoading = false;
+        });
+      } else {
+        debugPrint('Unexpected Supabase response: $response');
+        setState(() {
+          jobs = [];
+          isLoading = false;
+        });
+      }
+    } catch (e, st) {
+      debugPrint('Error fetching jobs: $e');
+      debugPrint(st.toString());
+      setState(() {
+        jobs = [];
+        isLoading = false;
+      });
+    }
+    debugPrint('fetchJobs() completed');
   }
 
   @override
@@ -179,7 +245,7 @@ class _JobListScreenState extends State<JobListScreen> {
                 )),
             const SizedBox(height: 24),
             DropdownButtonFormField<String>(
-              value: 'Abroad',
+              value: _selectedLocation,
               decoration: InputDecoration(
                 labelText: 'Choose location',
                 labelStyle: GoogleFonts.montserrat(
@@ -200,7 +266,11 @@ class _JobListScreenState extends State<JobListScreen> {
                 DropdownMenuItem(value: 'Uganda', child: Text('Uganda')),
                 DropdownMenuItem(value: 'Abroad', child: Text('Abroad')),
               ],
-              onChanged: (value) {},
+              onChanged: (value) {
+                setState(() {
+                  _selectedLocation = value ?? 'Abroad';
+                });
+              },
             ),
             const SizedBox(height: 20),
             const Align(
@@ -212,6 +282,7 @@ class _JobListScreenState extends State<JobListScreen> {
             ),
             const SizedBox(height: 4),
             DropdownButtonFormField<String>(
+              value: _selectedCategory,
               decoration: InputDecoration(
                 labelText: 'Job Category *',
                 border: OutlineInputBorder(
@@ -283,14 +354,18 @@ class _JobListScreenState extends State<JobListScreen> {
                     value: 'Other',
                     child: Text('Other', style: TextStyle(fontSize: 12))),
               ],
-              onChanged: (value) {},
+              onChanged: (value) {
+                setState(() {
+                  _selectedCategory = value;
+                });
+              },
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Trigger job search
+                  fetchJobs();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
@@ -306,54 +381,61 @@ class _JobListScreenState extends State<JobListScreen> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.only(top: 0),
-                itemCount: 5, // Replace with jobs.length when using real data
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  // Example job data
-                  final job = {
-                    'title': 'Job Title $index',
-                    'company': 'Company $index',
-                    'salary': 'UGX ${400000 + index * 100000}',
-                    'country': 'Uganda',
-                    'deadline': '2025-07-${15 + index}',
-                  };
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    child: ListTile(
-                      title: Text(job['title'] ?? '',
-                          style: GoogleFonts.montserrat(
-                              fontWeight: FontWeight.bold)),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(job['company'] ?? '',
-                              style: GoogleFonts.montserrat()),
-                          Text('Salary: ${job['salary']}',
-                              style: GoogleFonts.montserrat(fontSize: 12)),
-                          Text('Country: ${job['country']}',
-                              style: GoogleFonts.montserrat(fontSize: 12)),
-                          Text('Deadline: ${job['deadline']}',
-                              style: GoogleFonts.montserrat(
-                                  fontSize: 12, color: Colors.red)),
-                        ],
-                      ),
-                      trailing:
-                          Icon(Icons.bookmark_border, color: Colors.amber[800]),
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/job-detail',
-                          arguments: job,
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : jobs.isEmpty
+                      ? Center(
+                          child: Text('No jobs found.',
+                              style: GoogleFonts.montserrat()))
+                      : ListView.separated(
+                          padding: const EdgeInsets.only(top: 0),
+                          itemCount: jobs.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final job = jobs[index];
+                            return Card(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: ListTile(
+                                title: Text(job['title'] ?? '',
+                                    style: GoogleFonts.montserrat(
+                                        fontWeight: FontWeight.bold)),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(job['company'] ?? '',
+                                        style: GoogleFonts.montserrat()),
+                                    Text('Salary: ${job['salary'] ?? ''}',
+                                        style: GoogleFonts.montserrat(
+                                            fontSize: 12)),
+                                    Text('Country: ${job['country'] ?? ''}',
+                                        style: GoogleFonts.montserrat(
+                                            fontSize: 12)),
+                                    if ((job['city'] ?? '')
+                                        .toString()
+                                        .isNotEmpty)
+                                      Text('City: ${job['city']}',
+                                          style: GoogleFonts.montserrat(
+                                              fontSize: 12)),
+                                    Text('Deadline: ${job['deadline'] ?? ''}',
+                                        style: GoogleFonts.montserrat(
+                                            fontSize: 12, color: Colors.red)),
+                                  ],
+                                ),
+                                trailing: Icon(Icons.bookmark_border,
+                                    color: Colors.amber[800]),
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/job-detail',
+                                    arguments: job,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
             ),
           ],
         ),

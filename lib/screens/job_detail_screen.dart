@@ -94,10 +94,27 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         userEmail: userEmail,
         userPhone: userPhone,
         profilePhotoUrl: profilePhotoUrl,
+        backgroundColor: const Color(0xFFFFD23F), // Yellow background
         actions: [
-          BookmarkButton(job: job),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: BookmarkButton(job: job),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: IconButton(
+              icon: const Icon(Icons.logout, color: Colors.black),
+              tooltip: 'Logout',
+              onPressed: () async {
+                await Supabase.instance.client.auth.signOut();
+                if (mounted) {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/login', (route) => false);
+                }
+              },
+            ),
+          ),
         ],
-        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -127,35 +144,67 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 } catch (_) {}
                 final now = DateTime.now();
                 final isPast = deadline != null && deadline.isBefore(now);
-                return Text(
-                  t('deadline', lang) + ': $deadlineStr',
-                  style: GoogleFonts.montserrat(
-                    fontWeight: FontWeight.bold,
-                    color: deadline == null
-                        ? Colors.black
-                        : isPast
-                            ? Colors.red
-                            : Colors.green,
-                  ),
+
+                // Status logic
+                String statusText;
+                Color statusBg;
+                Color statusTextColor = Colors.white;
+                if (deadline == null) {
+                  statusText = t('status', lang) + ': ' + t('unknown', lang);
+                  statusBg = Colors.grey;
+                } else if (isPast) {
+                  statusText = t('', lang) + ': ' + t('Expired', lang);
+                  statusBg = Colors.red;
+                } else {
+                  statusText = t('', lang) + ': ' + t('Active', lang);
+                  statusBg = Colors.green;
+                }
+
+                // Deadline text color logic
+                Color deadlineTextColor;
+                if (deadline == null) {
+                  deadlineTextColor = Colors.black;
+                } else if (isPast) {
+                  deadlineTextColor = Colors.red;
+                } else {
+                  deadlineTextColor = Colors.green;
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t('deadline', lang) + ': $deadlineStr',
+                      style: GoogleFonts.montserrat(
+                        fontWeight: FontWeight.bold,
+                        color: deadlineTextColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: statusBg,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            statusText,
+                            style: GoogleFonts.montserrat(
+                              fontWeight: FontWeight.w500,
+                              color: statusTextColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 );
               },
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFD23F),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(t('postedBy', lang) + ': ${job['company']}',
-                      style:
-                          GoogleFonts.montserrat(fontWeight: FontWeight.w500)),
-                ),
-              ],
-            ),
+
             const SizedBox(height: 16),
             Text(t('jobDescription', lang),
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),

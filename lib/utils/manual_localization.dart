@@ -3,9 +3,9 @@
 const Map<String, Map<String, String>> kTranslations = {
   'appTitle': {'en': 'Job Pop', 'lg': 'Job Pop'},
   'login': {'en': 'Login', 'lg': 'Yingira'},
-  'signup': {'en': 'Sign Up', 'lg': 'Wandiika'},
+  'signup': {'en': 'Sign Up', 'lg': 'Wewandiise'},
   'chooseLanguage': {'en': 'Choose Language', 'lg': 'Londa Olulimi'},
-  'profile': {'en': 'Profile', 'lg': 'Omuko Ogwomuntu'},
+  'profile': {'en': 'Profile', 'lg': 'Bwino wo'},
   'logout': {'en': 'Logout', 'lg': 'Vamu'},
   'findAJobAnywhere': {
     'en': 'Find a job anywhere',
@@ -20,23 +20,23 @@ const Map<String, Map<String, String>> kTranslations = {
   'search': {'en': 'SEARCH', 'lg': 'NOONYEREZA'},
   'loginWithPhone': {
     'en': 'Or login with phone/username',
-    'lg': 'Oba yingira n\'omutimbagano/erinnya'
+    'lg': 'Oba yingira n\'essimu/erinnya'
   },
-  'usernameOrPhone': {'en': 'Username or Phone', 'lg': 'Erinnya oba Ssimu'},
+  'usernameOrPhone': {'en': 'Username or Phone', 'lg': 'Erinnya oba Essimu'},
   'usernameOrPhoneRequired': {
     'en': 'Username or phone is required',
-    'lg': 'Erinnya oba ssimu kikyetaagisa'
+    'lg': 'Erinnya oba Essimu yetaagisa'
   },
-  'password': {'en': 'Password', 'lg': 'Pasiwedi'},
+  'password': {'en': 'Password', 'lg': 'Pasiwaadi'},
   'passwordRequired': {
     'en': 'Password is required',
-    'lg': 'Pasiwedi ekyaetaagisa'
+    'lg': 'Pasiwaadi yetaagisa'
   },
-  'forgotPassword': {'en': 'Forgot Password?', 'lg': 'Woolabidde Pasiwedi?'},
+  'forgotPassword': {'en': 'Forgot Password?', 'lg': 'Welabidde Pasiwaadi?'},
   'createNewAccount': {'en': 'Create New Account', 'lg': 'Kola Akawunti Empya'},
   'createAccount': {'en': 'Create Account', 'lg': 'Kola Akawunti'},
   'createNewUser': {'en': 'Create New User', 'lg': 'Kola Omukozesa Omupya'},
-  'fullName': {'en': 'Full Name *', 'lg': 'Erinnya Lyona *'},
+  'fullName': {'en': 'Full Name *', 'lg': 'Erinnya lyo Lyona *'},
   'pleaseFillInYourFullName': {
     'en': 'Please fill in your full name',
     'lg': 'Jjuzza erinnya lyo lyonna'
@@ -49,17 +49,17 @@ const Map<String, Map<String, String>> kTranslations = {
   'username': {'en': 'Username *', 'lg': 'Erinnya Omukozesa *'},
   'pleaseEnterYourUsername': {
     'en': 'Please enter your username',
-    'lg': 'Yingiza erinnya omukozesa'
+    'lg': 'Yingiza erinnya ly\'omukozesa'
   },
   'phone': {'en': 'Phone *', 'lg': 'Ssimu *'},
   'pleaseEnterYourPhone': {
     'en': 'Please enter your phone',
     'lg': 'Yingiza essimu yo'
   },
-  'passwordField': {'en': 'Password *', 'lg': 'Pasiwedi *'},
+  'passwordField': {'en': 'Password *', 'lg': 'Pasiwaadi *'},
   'pleaseEnterYourPassword': {
     'en': 'Please enter your password',
-    'lg': 'Yingiza pasi wadi yo'
+    'lg': 'Yingiza pasiwadi yo'
   },
   'submit': {'en': 'Submit', 'lg': 'Twala'},
   'signupAsCompany': {
@@ -80,7 +80,7 @@ const Map<String, Map<String, String>> kTranslations = {
   },
   'incorrectPassword': {
     'en': 'Incorrect password.',
-    'lg': 'Pasiwedi si nnuunji.'
+    'lg': 'Pasiwaadi si nnuunji.'
   },
   'loginFailed': {'en': 'Login Failed', 'lg': 'Okuyingira Kulemereddwa'},
   'ok': {'en': 'OK', 'lg': 'Kale'},

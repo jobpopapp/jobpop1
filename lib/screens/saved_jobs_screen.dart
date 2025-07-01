@@ -113,40 +113,41 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                   itemBuilder: (context, index) {
                     final job = _savedJobs[index];
                     final jobData = job['jobs'] ?? {};
-                    // Compose a job map with all fields needed by the detail screen
+                    // Compose a job map with all fields needed by the detail screen, fallback to empty string if null
                     final detailJob = <String, dynamic>{
-                      'id': job['job_id'],
-                      'title': jobData['title'],
-                      'company': jobData['company'],
-                      'salary': jobData['salary'],
-                      'country': jobData['country'],
-                      'deadline': jobData['deadline'],
-                      'description':
-                          jobData['job_description'] ?? jobData['description'],
-                      'requirements': jobData['requirements'],
-                      'email': jobData['email'],
-                      'company_website': jobData['company_website'],
-                      'application_link': jobData['application_link'],
-                      'contact_phone': jobData['contact_phone'],
-                      'category': jobData['category'],
+                      'id': job['job_id'] ?? '',
+                      'title': jobData['title'] ?? '',
+                      'company': jobData['company'] ?? '',
+                      'salary': jobData['salary'] ?? '',
+                      'country': jobData['country'] ?? '',
+                      'deadline': jobData['deadline'] ?? '',
+                      'description': jobData['job_description'] ??
+                          jobData['description'] ??
+                          '',
+                      'requirements': jobData['requirements'] ?? '',
+                      'email': jobData['email'] ?? '',
+                      'company_website': jobData['company_website'] ?? '',
+                      'application_link': jobData['application_link'] ?? '',
+                      'contact_phone': jobData['contact_phone'] ?? '',
+                      'category': jobData['category'] ?? '',
                     };
                     return Card(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
-                        title: Text(jobData['title'] ?? '',
+                        title: Text(detailJob['title'],
                             style: GoogleFonts.montserrat(
                                 fontWeight: FontWeight.bold)),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(jobData['company'] ?? '',
+                            Text(detailJob['company'],
                                 style: GoogleFonts.montserrat()),
-                            Text('Salary: ${jobData['salary'] ?? ''}',
+                            Text('Salary: ${detailJob['salary']}',
                                 style: GoogleFonts.montserrat(fontSize: 12)),
-                            Text('Country: ${jobData['country'] ?? ''}',
+                            Text('Country: ${detailJob['country']}',
                                 style: GoogleFonts.montserrat(fontSize: 12)),
-                            Text('Deadline: ${jobData['deadline'] ?? ''}',
+                            Text('Deadline: ${detailJob['deadline']}',
                                 style: GoogleFonts.montserrat(
                                     fontSize: 12, color: Colors.red)),
                           ],
@@ -154,9 +155,11 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                         trailing:
                             Icon(Icons.bookmark, color: Colors.amber[800]),
                         onTap: () {
+                          debugPrint('Navigating to job detail with:');
+                          debugPrint(detailJob.toString());
                           Navigator.pushNamed(
                             context,
-                            '/job_detail',
+                            '/job-detail', // Use the same route as JobListScreen
                             arguments: detailJob,
                           );
                         },

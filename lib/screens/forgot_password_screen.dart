@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../utils/manual_localization.dart';
+import '../utils/language_provider.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
-  final VoidCallback? onToggleLanguage;
-  const ForgotPasswordScreen({super.key, this.onToggleLanguage});
+  const ForgotPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -14,14 +17,18 @@ class ForgotPasswordScreen extends StatelessWidget {
         elevation: 0,
         actions: [
           OutlinedButton(
-            onPressed: onToggleLanguage,
+            onPressed: () {
+              final provider =
+                  Provider.of<LanguageProvider>(context, listen: false);
+              provider.setLocale(lang == 'en' ? 'lg' : 'en');
+            },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.black),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text('EN | LG',
+            child: Text(lang == 'en' ? 'LG' : 'EN',
                 style: GoogleFonts.montserrat(color: Colors.black)),
           ),
         ],
@@ -31,13 +38,13 @@ class ForgotPasswordScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Forgot Password',
+            Text(t('forgotPassword', lang),
                 style: GoogleFonts.montserrat(
                     fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 32),
             TextField(
               decoration: InputDecoration(
-                labelText: 'Phone',
+                labelText: t('phone', lang),
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -47,7 +54,8 @@ class ForgotPasswordScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {},
-                child: Text('Send SMS', style: GoogleFonts.montserrat()),
+                child:
+                    Text(t('sendSms', lang), style: GoogleFonts.montserrat()),
               ),
             ),
           ],

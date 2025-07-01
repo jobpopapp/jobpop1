@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jobpopp/widgets/custom_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
+import '../utils/manual_localization.dart';
+import '../utils/language_provider.dart';
 
 class JobDetailScreen extends StatefulWidget {
   const JobDetailScreen({super.key});
@@ -61,6 +64,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     // Get job data from arguments if available
     final dynamic args = ModalRoute.of(context)?.settings.arguments;
     Map<String, dynamic> job;
@@ -68,18 +72,18 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       job = args;
     } else {
       job = {
-        'title': 'Housekeeper',
-        'category': 'Domestic Work',
-        'country': 'Uganda',
+        'title': t('defaultJobTitle', lang),
+        'category': t('defaultCategory', lang),
+        'country': t('uganda', lang),
         'salary': 'UGX 400,000',
         'deadline': '2025-07-15',
-        'company': 'Kampala Homes',
-        'description': 'Responsible for cleaning and maintaining the house.',
-        'requirements': 'Cleaning, Organization, Honesty',
-        'email': 'hr@kampalahomes.com',
-        'company_website': 'https://kampalahomes.com',
-        'application_link': 'https://kampalahomes.com/apply',
-        'contact_phone': '+256 700 000000',
+        'company': t('defaultCompany', lang),
+        'description': t('defaultDescription', lang),
+        'requirements': t('defaultRequirements', lang),
+        'email': '',
+        'company_website': '',
+        'application_link': '',
+        'contact_phone': '',
       };
     }
 
@@ -103,11 +107,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 style: GoogleFonts.montserrat(
                     fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text('Company: ${job['company']}', style: GoogleFonts.montserrat()),
-            Text('Category: ${job['category']}',
+            Text(t('company', lang) + ': ${job['company']}',
                 style: GoogleFonts.montserrat()),
-            Text('Country: ${job['country']}', style: GoogleFonts.montserrat()),
-            Text('Salary: ${job['salary']}', style: GoogleFonts.montserrat()),
+            Text(t('category', lang) + ': ${job['category']}',
+                style: GoogleFonts.montserrat()),
+            Text(t('country', lang) + ': ${job['country']}',
+                style: GoogleFonts.montserrat()),
+            Text(t('salary', lang) + ': ${job['salary']}',
+                style: GoogleFonts.montserrat()),
             // Deadline: bold, red if past, green if future
             Builder(
               builder: (context) {
@@ -121,7 +128,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 final now = DateTime.now();
                 final isPast = deadline != null && deadline.isBefore(now);
                 return Text(
-                  'Deadline: $deadlineStr',
+                  t('deadline', lang) + ': $deadlineStr',
                   style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.bold,
                     color: deadline == null
@@ -143,14 +150,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                     color: const Color(0xFFFFD23F),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text('Posted by: ${job['company']}',
+                  child: Text(t('postedBy', lang) + ': ${job['company']}',
                       style:
                           GoogleFonts.montserrat(fontWeight: FontWeight.w500)),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Text('Job Description',
+            Text(t('jobDescription', lang),
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
             // Show job description, fallback if missing
             if ((job['description'] ?? '').toString().trim().isNotEmpty)
@@ -162,11 +169,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               Text(job['job_description'] ?? '',
                   style: GoogleFonts.montserrat())
             else
-              Text('No description provided.',
+              Text(t('noDescriptionProvided', lang),
                   style: GoogleFonts.montserrat(
                       fontStyle: FontStyle.italic, color: Colors.grey)),
             const SizedBox(height: 16),
-            Text('Requirements',
+            Text(t('requirements', lang),
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
             Text(job['requirements'] ?? '', style: GoogleFonts.montserrat()),
             const SizedBox(height: 16),
@@ -191,7 +198,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         borderRadius: BorderRadius.circular(12)),
                     minimumSize: const Size.fromHeight(48),
                   ),
-                  child: Text('How to Apply',
+                  child: Text(t('howToApply', lang),
                       style: GoogleFonts.montserrat(fontSize: 18)),
                 ),
               ),
@@ -204,10 +211,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         onTap: _onNavTap,
         selectedItemColor: Colors.amber[800],
         unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Jobs'),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
+        items: [
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.person), label: t('profile', lang)),
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.search), label: t('jobs', lang)),
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.bookmark), label: t('saved', lang)),
         ],
       ),
     );

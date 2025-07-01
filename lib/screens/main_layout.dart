@@ -42,15 +42,9 @@ class _JobPopMainLayoutState extends State<JobPopMainLayout> {
   }
 
   List<Widget> get pages => [
-        ProfileScreen(
-          preferredLanguage: userProfile?['preferred_language'] ?? 'English',
-          onToggleLanguage: () {
-            // TODO: Implement language toggle logic
-          },
-          onLogout: showLogoutConfirmation,
-        ),
-        JobListScreen(),
-        Center(child: Text('Logging out...')),
+        const ProfileScreen(),
+        const JobListScreen(),
+        const Center(child: Text('Logging out...')),
       ];
 
   void onItemTapped(int index) {
@@ -95,7 +89,9 @@ class _JobPopMainLayoutState extends State<JobPopMainLayout> {
     });
     await Supabase.instance.client.auth.signOut();
     if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+      // Use pushReplacementNamed for mobile, and pop to root for web
+      // This ensures correct navigation for all platforms
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
     }
   }
 

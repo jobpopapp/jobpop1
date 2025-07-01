@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import '../utils/manual_localization.dart';
+import '../utils/language_provider.dart';
 
 class JobListScreen extends StatefulWidget {
   const JobListScreen({super.key});
@@ -162,6 +165,7 @@ class _JobListScreenState extends State<JobListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -193,7 +197,7 @@ class _JobListScreenState extends State<JobListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    username.isNotEmpty ? username : 'User',
+                    username.isNotEmpty ? username : t('profile', lang),
                     style: GoogleFonts.montserrat(
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -224,7 +228,7 @@ class _JobListScreenState extends State<JobListScreen> {
           IconButton(
             onPressed: _confirmAndLogout,
             icon: const Icon(Icons.logout, color: Colors.red),
-            tooltip: 'Logout',
+            tooltip: t('logout', lang),
           ),
         ],
       ),
@@ -233,7 +237,7 @@ class _JobListScreenState extends State<JobListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Find a job anywhere',
+            Text(t('findAJobAnywhere', lang),
                 style: GoogleFonts.montserrat(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -243,7 +247,7 @@ class _JobListScreenState extends State<JobListScreen> {
             DropdownButtonFormField<String>(
               value: _selectedLocation,
               decoration: InputDecoration(
-                labelText: 'Choose location',
+                labelText: t('chooseLocation', lang),
                 labelStyle: GoogleFonts.montserrat(
                   color: Colors.black,
                   fontWeight: FontWeight.w500,
@@ -258,9 +262,11 @@ class _JobListScreenState extends State<JobListScreen> {
                 color: Colors.black,
                 fontSize: 16,
               ),
-              items: const [
-                DropdownMenuItem(value: 'Uganda', child: Text('Uganda')),
-                DropdownMenuItem(value: 'Abroad', child: Text('Abroad')),
+              items: [
+                DropdownMenuItem(
+                    value: 'Uganda', child: Text(t('uganda', lang))),
+                DropdownMenuItem(
+                    value: 'Abroad', child: Text(t('abroad', lang))),
               ],
               onChanged: (value) {
                 setState(() {
@@ -269,89 +275,87 @@ class _JobListScreenState extends State<JobListScreen> {
               },
             ),
             const SizedBox(height: 20),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Please select a job category',
-                style: TextStyle(color: Color(0xFFD62828)),
+                t('pleaseSelectJobCategory', lang),
+                style: const TextStyle(color: Color(0xFFD62828)),
               ),
             ),
             const SizedBox(height: 4),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               decoration: InputDecoration(
-                labelText: 'Job Category',
+                labelText: t('jobCategory', lang),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              items: const [
+              items: [
                 DropdownMenuItem(
                     value: 'All Jobs',
-                    child: Text('All Jobs', style: TextStyle(fontSize: 12))),
+                    child: Text(t('allJobs', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Domestic Work',
-                    child: Text('Domestic Work (Housekeeping, Nanny, Maid)',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('domesticWork', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Construction & Manual Labor',
-                    child: Text('Construction & Manual Labor',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('constructionManualLabor', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Security Services',
-                    child: Text('Security Services (Guard, Bouncer)',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('securityServices', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Driving & Transport',
-                    child: Text(
-                        'Driving & Transport (Driver, Rider, Conductor)',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('drivingTransport', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Hospitality & Tourism',
-                    child: Text(
-                        'Hospitality & Tourism (Waiter, Chef, Hotel Staff)',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('hospitalityTourism', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Healthcare & Nursing',
-                    child: Text('Healthcare & Nursing',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('healthcareNursing', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Education & Teaching',
-                    child: Text('Education & Teaching',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('educationTeaching', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Sales & Retail',
-                    child: Text('Sales & Retail (Shop Attendant, Cashier)',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('salesRetail', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Agriculture & Farming',
-                    child: Text('Agriculture & Farming',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('agricultureFarming', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Cleaning & Maintenance',
-                    child: Text('Cleaning & Maintenance',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('cleaningMaintenance', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'IT & Technical',
-                    child: Text(
-                        'IT & Technical (Computer, Telecom, Engineering)',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('itTechnical', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Office & Administration',
-                    child: Text('Office & Administration',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('officeAdministration', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Beauty & Personal Care',
-                    child: Text('Beauty & Personal Care (Salon, Barber, Spa)',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('beautyPersonalCare', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Artisan & Skilled Trades',
-                    child: Text(
-                        'Artisan & Skilled Trades (Tailor, Carpenter, Mechanic)',
-                        style: TextStyle(fontSize: 12))),
+                    child: Text(t('artisanSkilledTrades', lang),
+                        style: const TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Other',
-                    child: Text('Other', style: TextStyle(fontSize: 12))),
+                    child: Text(t('other', lang),
+                        style: const TextStyle(fontSize: 12))),
               ],
               onChanged: (value) {
                 setState(() {
@@ -373,7 +377,7 @@ class _JobListScreenState extends State<JobListScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('SEARCH',
+                child: Text(t('search', lang),
                     style: GoogleFonts.montserrat(
                         fontWeight: FontWeight.bold, color: Colors.white)),
               ),
@@ -384,7 +388,7 @@ class _JobListScreenState extends State<JobListScreen> {
                   ? Center(child: CircularProgressIndicator())
                   : jobs.isEmpty
                       ? Center(
-                          child: Text('No jobs found.',
+                          child: Text(t('noJobsFound', lang),
                               style: GoogleFonts.montserrat()))
                       : ListView.separated(
                           padding: const EdgeInsets.only(top: 0),
@@ -403,19 +407,25 @@ class _JobListScreenState extends State<JobListScreen> {
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Category: ${job['category'] ?? ''}',
+                                    Text(
+                                        t('category', lang) +
+                                            ': ${job['category'] ?? ''}',
                                         style: GoogleFonts.montserrat(
                                             fontSize: 12)),
-                                    Text('Salary: ${job['salary'] ?? ''}',
+                                    Text(
+                                        t('salary', lang) +
+                                            ': ${job['salary'] ?? ''}',
                                         style: GoogleFonts.montserrat(
                                             fontSize: 12)),
-                                    Text('Country: ${job['country'] ?? ''}',
+                                    Text(
+                                        t('country', lang) +
+                                            ': ${job['country'] ?? ''}',
                                         style: GoogleFonts.montserrat(
                                             fontSize: 12)),
                                     if ((job['city'] ?? '')
                                         .toString()
                                         .isNotEmpty)
-                                      Text('City: ${job['city']}',
+                                      Text(t('city', lang) + ': ${job['city']}',
                                           style: GoogleFonts.montserrat(
                                               fontSize: 12)),
                                     // Deadline: bold, red if past, green if future
@@ -435,7 +445,8 @@ class _JobListScreenState extends State<JobListScreen> {
                                         final isPast = deadline != null &&
                                             deadline.isBefore(now);
                                         return Text(
-                                          'Deadline: $deadlineStr',
+                                          t('deadline', lang) +
+                                              ': $deadlineStr',
                                           style: GoogleFonts.montserrat(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
@@ -485,10 +496,13 @@ class _JobListScreenState extends State<JobListScreen> {
         },
         selectedItemColor: Colors.amber[800],
         unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Jobs'),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
+        items: [
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.person), label: t('profile', lang)),
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.search), label: t('jobs', lang)),
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.bookmark), label: t('saved', lang)),
         ],
       ),
     );

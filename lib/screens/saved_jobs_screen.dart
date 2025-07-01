@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jobpopp/widgets/custom_app_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
+import '../utils/manual_localization.dart';
+import '../utils/language_provider.dart';
 
 class SavedJobsScreen extends StatefulWidget {
   const SavedJobsScreen({Key? key}) : super(key: key);
@@ -81,6 +84,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
@@ -94,7 +98,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
               // TODO: Add logout logic if needed
             },
             icon: const Icon(Icons.logout, color: Colors.red),
-            tooltip: 'Logout',
+            tooltip: t('logout', lang),
           ),
         ],
       ),
@@ -102,7 +106,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _savedJobs.isEmpty
               ? Center(
-                  child: Text('No saved jobs yet.',
+                  child: Text(t('noSavedJobs', lang),
                       style: GoogleFonts.montserrat(fontSize: 16)),
                 )
               : ListView.separated(
@@ -143,11 +147,15 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                           children: [
                             Text(detailJob['company'],
                                 style: GoogleFonts.montserrat()),
-                            Text('Salary: ${detailJob['salary']}',
+                            Text(t('salary', lang) + ': ${detailJob['salary']}',
                                 style: GoogleFonts.montserrat(fontSize: 12)),
-                            Text('Country: ${detailJob['country']}',
+                            Text(
+                                t('country', lang) +
+                                    ': ${detailJob['country']}',
                                 style: GoogleFonts.montserrat(fontSize: 12)),
-                            Text('Deadline: ${detailJob['deadline']}',
+                            Text(
+                                t('deadline', lang) +
+                                    ': ${detailJob['deadline']}',
                                 style: GoogleFonts.montserrat(
                                     fontSize: 12, color: Colors.red)),
                           ],
@@ -184,10 +192,13 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
         },
         selectedItemColor: Colors.amber[800],
         unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Jobs'),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
+        items: [
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.person), label: t('profile', lang)),
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.search), label: t('jobs', lang)),
+          BottomNavigationBarItem(
+              icon: const Icon(Icons.bookmark), label: t('saved', lang)),
         ],
       ),
     );

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../utils/language_provider.dart';
+import '../utils/manual_localization.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show OAuthProvider;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/password_hash.dart';
 
 class LoginScreen extends StatefulWidget {
-  final VoidCallback? onToggleLanguage;
-  const LoginScreen({super.key, this.onToggleLanguage});
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -43,6 +45,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _signInWithGoogle() async {
+    final lang = Provider.of<LanguageProvider>(context, listen: false)
+        .locale
+        .languageCode;
     setState(() => _isLoading = true);
     try {
       await Supabase.instance.client.auth.signInWithOAuth(
@@ -53,7 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (error) {
       print('Google sign-in failed: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google sign-in failed: $error')),
+        SnackBar(
+            content: Text(t('signInWithGoogle', lang) + ' failed: $error')),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -61,6 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _signInWithPhone() async {
+    final lang = Provider.of<LanguageProvider>(context, listen: false)
+        .locale
+        .languageCode;
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     showDialog(
@@ -81,14 +90,14 @@ class _LoginScreenState extends State<LoginScreen> {
           .maybeSingle();
       if (profile == null) {
         Navigator.of(context, rootNavigator: true).pop();
-        _showErrorDialog('No user found with that phone or username.');
+        _showErrorDialog(t('noUserFound', lang));
         return;
       }
       // Check password (hash and compare)
       final hashedInput = hashPassword(password); // Use the same hash as signup
       if (profile['password'] != hashedInput) {
         Navigator.of(context, rootNavigator: true).pop();
-        _showErrorDialog('Incorrect password.');
+        _showErrorDialog(t('incorrectPassword', lang));
         return;
       }
       // Save phone to SharedPreferences for phone-only login
@@ -102,28 +111,31 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       Navigator.of(context, rootNavigator: true).pop();
       print('Phone login error: $e');
-      _showErrorDialog('Login failed: $e');
+      _showErrorDialog("${t('loginFailed', lang)}: $e");
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
   void _showErrorDialog(String message) {
+    final lang = Provider.of<LanguageProvider>(context, listen: false)
+        .locale
+        .languageCode;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
-          children: const [
-            Icon(Icons.error, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Login Failed'),
+          children: [
+            const Icon(Icons.error, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(t('loginFailed', lang)),
           ],
         ),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(t('ok', lang)),
           ),
         ],
       ),
@@ -141,19 +153,22 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _confirmAndLogout() async {
+    final lang = Provider.of<LanguageProvider>(context, listen: false)
+        .locale
+        .languageCode;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(t('confirmLogout', lang)),
+        content: Text(t('areYouSureLogout', lang)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(t('cancel', lang)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Logout'),
+            child: Text(t('logoutButton', lang)),
           ),
         ],
       ),
@@ -165,6 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -172,7 +188,12 @@ class _LoginScreenState extends State<LoginScreen> {
         elevation: 0,
         actions: [
           OutlinedButton(
-            onPressed: widget.onToggleLanguage,
+            onPressed: () {
+              final provider =
+                  Provider.of<LanguageProvider>(context, listen: false);
+              final current = provider.locale.languageCode;
+              provider.setLocale(current == 'en' ? 'lg' : 'en');
+            },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.black),
               shape: RoundedRectangleBorder(
@@ -185,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _confirmAndLogout,
-            tooltip: 'Logout',
+            tooltip: t('logout', lang),
           ),
         ],
       ),
@@ -198,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 Image.asset('assets/logo.png', height: 100),
                 const SizedBox(height: 24),
-                Text('Login',
+                Text(t('login', lang),
                     style: GoogleFonts.montserrat(
                         fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 40),
@@ -211,14 +232,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 0),
                   ),
-                  child: Image.asset(
-                    'assets/google.png',
-                    height: 40,
-                    width: 250,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/google.png',
+                        height: 40,
+                        width: 40,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(t('signInWithGoogle', lang),
+                          style: GoogleFonts.montserrat(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('or login with phone',
+                Text(t('loginWithPhone', lang),
                     style: GoogleFonts.montserrat(color: Colors.grey.shade600)),
                 const SizedBox(height: 16),
                 Form(
@@ -228,10 +259,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextFormField(
                         controller: _usernameOrPhoneController,
                         validator: (v) => v == null || v.isEmpty
-                            ? 'Username or phone required'
+                            ? t('usernameOrPhoneRequired', lang)
                             : null,
                         decoration: InputDecoration(
-                          labelText: 'Username / Phone *',
+                          labelText: t('usernameOrPhone', lang),
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12)),
                         ),
@@ -240,10 +271,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Password required' : null,
+                        validator: (v) => v == null || v.isEmpty
+                            ? t('passwordRequired', lang)
+                            : null,
                         decoration: InputDecoration(
-                          labelText: 'Password *',
+                          labelText: t('password', lang),
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12)),
                         ),
@@ -259,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: Text('LOGIN',
+                          child: Text(t('login', lang),
                               style: GoogleFonts.montserrat(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white)),
@@ -271,12 +303,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {},
-                  child: Text('Forgot Password?',
+                  child: Text(t('forgotPassword', lang),
                       style: GoogleFonts.montserrat(color: Colors.blue)),
                 ),
                 TextButton(
                   onPressed: () {},
-                  child: Text('Create New Account',
+                  child: Text(t('createNewAccount', lang),
                       style: GoogleFonts.montserrat(color: Colors.blue)),
                 ),
               ],

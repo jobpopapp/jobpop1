@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'utils/language_provider.dart';
+import 'utils/manual_localization.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/job_list_screen.dart';
 import 'screens/job_detail_screen.dart';
 import 'screens/saved_jobs_screen.dart';
-
 import 'screens/profile_screen.dart';
-
 import 'dart:ui';
 
 void main() async {
@@ -22,45 +20,23 @@ void main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNub2tqYmNoZWlpdmRyYWZtdHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Njc0MjQsImV4cCI6MjA2NjM0MzQyNH0.K6AGHXAKno8fBJwgGvWR-7eN0C8qs3OmoZPsqxfylzM',
   );
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => LanguageProvider()..loadLocale(),
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  Locale? _locale;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadLocale();
-  }
-
-  Future<void> _loadLocale() async {
-    final prefs = await SharedPreferences.getInstance();
-    final code = prefs.getString('locale') ?? 'en';
-    setState(() {
-      _locale = Locale(code);
-    });
-  }
-
-  void setLocale(Locale locale) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('locale', locale.languageCode);
-    setState(() {
-      _locale = locale;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final lang =
+        Provider.of<LanguageProvider>(context).locale.languageCode ?? 'en';
     return MaterialApp(
-      title: 'Job Pop',
+      title: t('appTitle', lang),
       theme: ThemeData(
         colorScheme: ColorScheme(
           brightness: Brightness.light,
@@ -94,18 +70,7 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      locale: _locale,
-      supportedLocales: const [
-        Locale('en'),
-        Locale('lg'),
-      ],
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: MyHomePage(title: 'Job Pop', onLocaleChanged: setLocale),
+      home: MyHomePage(),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
@@ -120,42 +85,13 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  final String title;
-  final void Function(Locale) onLocaleChanged;
-  const MyHomePage(
-      {super.key, required this.title, required this.onLocaleChanged});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  String _selectedLang = 'en';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadLang();
-  }
-
-  Future<void> _loadLang() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _selectedLang = prefs.getString('locale') ?? 'en';
-    });
-  }
-
-  void _onLangChanged(String lang) {
-    setState(() {
-      _selectedLang = lang;
-    });
-    widget.onLocaleChanged(Locale(lang));
-  }
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
+    final lang =
+        Provider.of<LanguageProvider>(context).locale.languageCode ?? 'en';
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -173,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(height: 20),
               const SizedBox(height: 4),
               Text(
-                'MAKING IT EASY',
+                t('slogan', lang),
                 style: GoogleFonts.montserrat(
                   color: Colors.white54,
                   fontSize: 12,
@@ -190,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   children: [
                     TextSpan(
-                      text: loc.findAJobAnywhere,
+                      text: t('findAJobAnywhere', lang),
                       style: const TextStyle(color: Colors.white),
                     ),
                   ],
@@ -211,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 child: Text(
-                  loc.login,
+                  t('login', lang),
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -224,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.pushNamed(context, '/signup');
                 },
                 child: Text(
-                  loc.signup,
+                  t('signup', lang),
                   style: GoogleFonts.montserrat(
                     color: Colors.blueAccent,
                     decoration: TextDecoration.underline,
@@ -237,30 +173,40 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   Radio<String>(
                     value: 'lg',
-                    groupValue: _selectedLang,
-                    onChanged: (val) => _onLangChanged(val!),
+                    groupValue: lang,
+                    onChanged: (val) {
+                      if (val != null) {
+                        Provider.of<LanguageProvider>(context, listen: false)
+                            .setLocale(val);
+                      }
+                    },
                     activeColor: Colors.white,
                   ),
                   Text(
-                    'Luganda',
+                    t('luganda', lang),
                     style: GoogleFonts.montserrat(color: Colors.white),
                   ),
                   const SizedBox(width: 20),
                   Radio<String>(
                     value: 'en',
-                    groupValue: _selectedLang,
-                    onChanged: (val) => _onLangChanged(val!),
+                    groupValue: lang,
+                    onChanged: (val) {
+                      if (val != null) {
+                        Provider.of<LanguageProvider>(context, listen: false)
+                            .setLocale(val);
+                      }
+                    },
                     activeColor: Colors.white,
                   ),
                   Text(
-                    'English',
+                    t('english', lang),
                     style: GoogleFonts.montserrat(color: Colors.white),
                   ),
                 ],
               ),
               const Spacer(),
               Text(
-                'All Jobs listed are from verified companies\nApp is Regulated by the Government of Uganda',
+                t('footerNote', lang),
                 style: GoogleFonts.montserrat(
                   color: const Color(0xFFFFD23F),
                   fontSize: 12,

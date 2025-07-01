@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/password_hash.dart';
+import '../utils/language_provider.dart';
+import '../utils/manual_localization.dart';
 
 enum SignupMode { select, phone, googleProfile, completeAuthProfile }
 
 class SignupScreen extends StatefulWidget {
-  final VoidCallback? onToggleLanguage;
-  const SignupScreen({super.key, this.onToggleLanguage});
+  const SignupScreen({Key? key}) : super(key: key);
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -38,36 +40,36 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  String? _validatePhone(String? value) {
-    if (value == null || value.isEmpty) return 'Phone required';
+  String? _validatePhone(String? value, String lang) {
+    if (value == null || value.isEmpty) return t('phoneRequired', lang);
     final phonePattern = RegExp(r'^0[7][0-9]{8}');
     if (!phonePattern.hasMatch(value)) {
-      return 'Enter phone in 07XXXXXXXX format';
+      return t('phoneFormat', lang);
     }
     return null;
   }
 
   Future<void> _signup() async {
+    final lang = Provider.of<LanguageProvider>(context, listen: false)
+        .locale
+        .languageCode;
     if (!_formKey.currentState!.validate()) return;
-    // Remove unused pending* variables
     final email = _emailController.text.trim();
     if (email.isNotEmpty) {
-      // Show Google signup confirmation dialog
       final proceed = await showDialog<bool>(
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          title: const Text('Sign up with Google'),
-          content: const Text(
-              'You entered an email. Please sign up with Google to continue.'),
+          title: Text(t('signupWithGoogle', lang)),
+          content: Text(t('signupWithGoogleMsg', lang)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(t('cancel', lang)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Continue with Google'),
+              child: Text(t('continueWithGoogle', lang)),
             ),
           ],
         ),
@@ -248,6 +250,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -255,7 +258,12 @@ class _SignupScreenState extends State<SignupScreen> {
         elevation: 0,
         actions: [
           OutlinedButton(
-            onPressed: widget.onToggleLanguage,
+            onPressed: () {
+              final provider =
+                  Provider.of<LanguageProvider>(context, listen: false);
+              final current = provider.locale.languageCode;
+              provider.setLocale(current == 'en' ? 'lg' : 'en');
+            },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.black),
               shape: RoundedRectangleBorder(
@@ -269,26 +277,26 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: _buildBody(context),
+        child: _buildBody(context, lang),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, String lang) {
     switch (_mode) {
       case SignupMode.select:
-        return _buildSelectMode();
+        return _buildSelectMode(lang);
       case SignupMode.phone:
-        return _buildPhoneMode();
+        return _buildPhoneMode(lang);
       case SignupMode.googleProfile:
-        return _buildGoogleProfileMode();
+        return _buildGoogleProfileMode(lang);
       case SignupMode.completeAuthProfile:
         return _buildCompleteAuthProfileMode(
-            _authProfileUserId!, _authProfileEmail);
+            _authProfileUserId!, _authProfileEmail, lang);
     }
   }
 
-  Widget _buildSelectMode() {
+  Widget _buildSelectMode(String lang) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -345,7 +353,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildPhoneMode() {
+  Widget _buildPhoneMode(String lang) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Form(
@@ -354,45 +362,43 @@ class _SignupScreenState extends State<SignupScreen> {
           children: [
             Image.asset('assets/logo.png', height: 100),
             const SizedBox(height: 16),
-            const Text(
-              'Create New User',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
+            Text(t('createNewUser', lang),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             // Name
-            const Align(
+            Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Please fill in your full name',
+                child: Text(t('pleaseFillFullName', lang),
                     style: TextStyle(color: Colors.red))),
             const SizedBox(height: 4),
             TextFormField(
               controller: _fullNameController,
               validator: (v) =>
-                  v == null || v.isEmpty ? 'Full name required' : null,
+                  v == null || v.isEmpty ? t('fullNameRequired', lang) : null,
               decoration: InputDecoration(
-                labelText: 'Full Name *',
+                labelText: t('fullName', lang) + ' *',
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 16),
             // Country
-            const Align(
+            Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Please select a country',
+                child: Text(t('pleaseSelectCountry', lang),
                     style: TextStyle(color: Colors.red))),
             const SizedBox(height: 4),
             DropdownButtonFormField<String>(
               value: selectedCountry,
               decoration: InputDecoration(
-                labelText: 'Country *',
+                labelText: t('country', lang) + ' *',
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              items: const [
-                DropdownMenuItem(value: 'UG', child: Text('Uganda')),
-                DropdownMenuItem(value: 'KE', child: Text('Kenya')),
-                DropdownMenuItem(value: 'TZ', child: Text('Tanzania')),
+              items: [
+                DropdownMenuItem(value: 'UG', child: Text(t('uganda', lang))),
+                DropdownMenuItem(value: 'KE', child: Text(t('kenya', lang))),
+                DropdownMenuItem(value: 'TZ', child: Text(t('tanzania', lang))),
               ],
               onChanged: (value) {
                 setState(() {
@@ -402,51 +408,51 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 16),
             // Username
-            const Align(
+            Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Please enter your username',
+                child: Text(t('pleaseEnterUsername', lang),
                     style: TextStyle(color: Colors.red))),
             const SizedBox(height: 4),
             TextFormField(
               controller: _usernameController,
               validator: (v) =>
-                  v == null || v.isEmpty ? 'Username required' : null,
+                  v == null || v.isEmpty ? t('usernameRequired', lang) : null,
               decoration: InputDecoration(
-                labelText: 'Username *',
+                labelText: t('username', lang) + ' *',
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 16),
             // Phone
-            const Align(
+            Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Please enter your phone',
+                child: Text(t('pleaseEnterPhone', lang),
                     style: TextStyle(color: Colors.red))),
             const SizedBox(height: 4),
             TextFormField(
               controller: _phoneController,
-              validator: _validatePhone,
+              validator: (v) => _validatePhone(v, lang),
               decoration: InputDecoration(
-                labelText: 'Phone *',
+                labelText: t('phone', lang) + ' *',
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 16),
             // Password
-            const Align(
+            Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Please enter your password',
+                child: Text(t('pleaseEnterPassword', lang),
                     style: TextStyle(color: Colors.red))),
             const SizedBox(height: 4),
             TextFormField(
               controller: _passwordController,
               obscureText: true,
               validator: (v) =>
-                  v == null || v.isEmpty ? 'Password required' : null,
+                  v == null || v.isEmpty ? t('passwordRequired', lang) : null,
               decoration: InputDecoration(
-                labelText: 'Password *',
+                labelText: t('password', lang) + ' *',
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -463,7 +469,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('LOGIN',
+                child: Text(t('login', lang),
                     style: TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.white)),
               ),
@@ -472,8 +478,8 @@ class _SignupScreenState extends State<SignupScreen> {
             // Signup as company
             TextButton(
               onPressed: () {},
-              child: const Text(
-                'Signup as a Company Instead',
+              child: Text(
+                t('signupAsCompany', lang),
                 style: TextStyle(color: Colors.blue),
               ),
             ),
@@ -484,14 +490,14 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildGoogleProfileMode() {
+  Widget _buildGoogleProfileMode(String lang) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const CircularProgressIndicator(color: Color(0xFFFFD23F)),
           const SizedBox(height: 16),
-          Text('Signing you up with Google...',
+          Text(t('signingUpWithGoogle', lang),
               style: GoogleFonts.montserrat(
                   color: Colors.black, fontWeight: FontWeight.bold)),
         ],
@@ -499,7 +505,8 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildCompleteAuthProfileMode(String userId, String? email) {
+  Widget _buildCompleteAuthProfileMode(
+      String userId, String? email, String lang) {
     final _completeFormKey = GlobalKey<FormState>();
     final _fullNameController = TextEditingController();
     final _usernameController = TextEditingController();
@@ -593,7 +600,7 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _phoneController,
-              validator: _validatePhone,
+              validator: (v) => _validatePhone(v, lang),
               decoration: InputDecoration(
                 labelText: 'Phone *',
                 border:
@@ -650,16 +657,16 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     super.dispose();
   }
 
-  String? _validatePhone(String? value) {
-    if (value == null || value.isEmpty) return 'Phone required';
+  String? _validatePhone(String? value, String lang) {
+    if (value == null || value.isEmpty) return t('phoneRequired', lang);
     final phonePattern = RegExp(r'^0[7][0-9]{8}');
     if (!phonePattern.hasMatch(value)) {
-      return 'Enter phone in 07XXXXXXXX format';
+      return t('phoneFormat', lang);
     }
     return null;
   }
 
-  Future<void> _submitProfile() async {
+  Future<void> _submitProfile(String lang) async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     showDialog(
@@ -691,12 +698,18 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: Text('Failed to complete profile: $e'),
+          title: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.red),
+              const SizedBox(width: 8),
+              Text(t('error', lang)),
+            ],
+          ),
+          content: Text(t('failedToCompleteProfile', lang) + ': $e'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+              child: Text(t('ok', lang)),
             ),
           ],
         ),
@@ -708,10 +721,32 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Complete Your Profile'),
+        title: Text(t('completeYourProfile', lang)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          OutlinedButton(
+            onPressed: () {
+              final provider =
+                  Provider.of<LanguageProvider>(context, listen: false);
+              final current = provider.locale.languageCode;
+              provider.setLocale(current == 'en' ? 'lg' : 'en');
+            },
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.black),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text('EN | LG',
+                style: GoogleFonts.montserrat(color: Colors.black)),
+          ),
+        ],
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -720,7 +755,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Please complete your profile information.',
+                t('pleaseCompleteProfile', lang),
                 style: GoogleFonts.montserrat(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
@@ -728,9 +763,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
               TextFormField(
                 controller: _fullNameController,
                 validator: (v) =>
-                    v == null || v.isEmpty ? 'Full name required' : null,
+                    v == null || v.isEmpty ? t('fullNameRequired', lang) : null,
                 decoration: InputDecoration(
-                  labelText: 'Full Name *',
+                  labelText: t('fullName', lang) + ' *',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -741,14 +776,15 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     ? _countryController.text
                     : 'UG',
                 decoration: InputDecoration(
-                  labelText: 'Country *',
+                  labelText: t('country', lang) + ' *',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'UG', child: Text('Uganda')),
-                  DropdownMenuItem(value: 'KE', child: Text('Kenya')),
-                  DropdownMenuItem(value: 'TZ', child: Text('Tanzania')),
+                items: [
+                  DropdownMenuItem(value: 'UG', child: Text(t('uganda', lang))),
+                  DropdownMenuItem(value: 'KE', child: Text(t('kenya', lang))),
+                  DropdownMenuItem(
+                      value: 'TZ', child: Text(t('tanzania', lang))),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -760,9 +796,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
               TextFormField(
                 controller: _usernameController,
                 validator: (v) =>
-                    v == null || v.isEmpty ? 'Username required' : null,
+                    v == null || v.isEmpty ? t('usernameRequired', lang) : null,
                 decoration: InputDecoration(
-                  labelText: 'Username *',
+                  labelText: t('username', lang) + ' *',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -770,9 +806,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _phoneController,
-                validator: _validatePhone,
+                validator: (v) => _validatePhone(v, lang),
                 decoration: InputDecoration(
-                  labelText: 'Phone *',
+                  labelText: t('phone', lang) + ' *',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -781,14 +817,14 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _submitProfile,
+                  onPressed: _isLoading ? null : () => _submitProfile(lang),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text('Submit',
+                  child: Text(t('submit', lang),
                       style: GoogleFonts.montserrat(color: Colors.white)),
                 ),
               ),

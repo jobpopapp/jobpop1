@@ -110,14 +110,15 @@ class _JobListScreenState extends State<JobListScreen> {
     debugPrint('fetchJobs() called');
     try {
       debugPrint('Fetching jobs...');
-      debugPrint('Selected location: \\$_selectedLocation');
-      debugPrint('Selected category: \\$_selectedCategory');
-      var query =
-          supabase.from('jobs').select().order('deadline', ascending: true);
+      debugPrint('Selected location: $_selectedLocation');
+      debugPrint('Selected category: $_selectedCategory');
+      var query = supabase.from('jobs').select();
       bool filterAbroadClientSide = false;
+
+      // Apply filters before ordering
       if (_selectedLocation == 'Uganda') {
         debugPrint('Applying filter: country == Uganda');
-        query = (query as dynamic).eq('country', 'Uganda');
+        query = query.eq('country', 'Uganda');
       } else if (_selectedLocation == 'Abroad') {
         debugPrint(
             'Applying filter: country != Uganda (client-side for web and all platforms)');
@@ -127,34 +128,27 @@ class _JobListScreenState extends State<JobListScreen> {
       if (_selectedCategory != null &&
           _selectedCategory != 'All Jobs' &&
           _selectedCategory!.isNotEmpty) {
-        debugPrint('Applying filter: category == \\$_selectedCategory');
-        query = (query as dynamic).eq('category', _selectedCategory);
+        debugPrint('Applying filter: category == $_selectedCategory');
+        query = query.eq('category', _selectedCategory!);
       }
-      final response = await query;
+      // Now order by deadline (do not reassign to query, just chain)
+      final response = await query.order('deadline', ascending: true);
       debugPrint('Supabase response: ${response.runtimeType} $response');
-      if (response is List) {
-        List<Map<String, dynamic>> result =
-            List<Map<String, dynamic>>.from(response);
-        if (filterAbroadClientSide) {
-          debugPrint(
-              'Filtering out jobs with country == Uganda (client-side abroad filter)');
-          result = result
-              .where((job) =>
-                  (job['country'] ?? '').toString().trim().toLowerCase() !=
-                  'uganda')
-              .toList();
-        }
-        setState(() {
-          jobs = result;
-          isLoading = false;
-        });
-      } else {
-        debugPrint('Unexpected Supabase response: $response');
-        setState(() {
-          jobs = [];
-          isLoading = false;
-        });
+      List<Map<String, dynamic>> result =
+          List<Map<String, dynamic>>.from(response);
+      if (filterAbroadClientSide) {
+        debugPrint(
+            'Filtering out jobs with country == Uganda (client-side abroad filter)');
+        result = result
+            .where((job) =>
+                (job['country'] ?? '').toString().trim().toLowerCase() !=
+                'uganda')
+            .toList();
       }
+      setState(() {
+        jobs = result;
+        isLoading = false;
+      });
     } catch (e, st) {
       debugPrint('Error fetching jobs: $e');
       debugPrint(st.toString());

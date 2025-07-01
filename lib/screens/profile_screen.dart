@@ -76,19 +76,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         userEmail: userEmail,
         userPhone: userPhone,
         profilePhotoUrl: profilePhotoUrl,
-        actions: [
-          OutlinedButton(
-            onPressed: widget.onToggleLanguage,
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.black),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text('EN | LG',
-                style: GoogleFonts.montserrat(color: Colors.black)),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),

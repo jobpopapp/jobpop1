@@ -455,12 +455,19 @@ class _JobApplyScreenState extends State<JobApplyScreen> {
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    job['email'] ?? '',
-                    style: GoogleFonts.montserrat(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                      height: 1.2,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.blue, width: 1),
+                      ),
+                    ),
+                    child: Text(
+                      job['email'] ?? '',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.blue,
+                        decoration: TextDecoration.none,
+                        height: 1.2,
+                      ),
                     ),
                   ),
                 ),
@@ -484,12 +491,19 @@ class _JobApplyScreenState extends State<JobApplyScreen> {
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    job['company_website'] ?? '',
-                    style: GoogleFonts.montserrat(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                      height: 1.2,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.blue, width: 1),
+                      ),
+                    ),
+                    child: Text(
+                      job['company_website'] ?? '',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.blue,
+                        decoration: TextDecoration.none,
+                        height: 1.2,
+                      ),
                     ),
                   ),
                 ),
@@ -513,12 +527,19 @@ class _JobApplyScreenState extends State<JobApplyScreen> {
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    job['application_link'] ?? '',
-                    style: GoogleFonts.montserrat(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                      height: 1.2,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.blue, width: 1),
+                      ),
+                    ),
+                    child: Text(
+                      job['application_link'] ?? '',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.blue,
+                        decoration: TextDecoration.none,
+                        height: 1.2,
+                      ),
                     ),
                   ),
                 ),
@@ -542,12 +563,19 @@ class _JobApplyScreenState extends State<JobApplyScreen> {
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    job['contact_phone'] ?? '',
-                    style: GoogleFonts.montserrat(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                      height: 1.2,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.blue, width: 1),
+                      ),
+                    ),
+                    child: Text(
+                      job['contact_phone'] ?? '',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.blue,
+                        decoration: TextDecoration.none,
+                        height: 1.2,
+                      ),
                     ),
                   ),
                 ),

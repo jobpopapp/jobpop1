@@ -14,14 +14,39 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
   List<Map<String, dynamic>> _savedJobs = [];
   bool _loading = true;
   String username = 'User';
-  String userEmail = '';
-  String userPhone = '';
+  String? userEmail;
+  String? userPhone;
   String? profilePhotoUrl;
 
   @override
   void initState() {
     super.initState();
+    fetchUserProfile();
     _fetchSavedJobs();
+  }
+
+  Future<void> fetchUserProfile() async {
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+    if (user != null) {
+      final profile = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
+      setState(() {
+        username = user.userMetadata?['full_name'] ??
+            user.userMetadata?['name'] ??
+            profile?['username'] ??
+            'User';
+        userEmail = user.userMetadata?['email'] ?? profile?['email'] ?? '';
+        userPhone = user.userMetadata?['phone'] ?? profile?['phone'] ?? '';
+        profilePhotoUrl =
+            user.userMetadata?['avatar_url'] ?? profile?['profile_photo_url'];
+      });
+    } else {
+      // Optionally handle phone-only login with SharedPreferences if needed
+    }
   }
 
   Future<void> _fetchSavedJobs() async {
@@ -92,17 +117,17 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  if (userEmail.isNotEmpty)
+                  if (userEmail != null && userEmail!.isNotEmpty)
                     Text(
-                      userEmail,
+                      userEmail!,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
                         color: Color.fromARGB(255, 122, 0, 0),
                       ),
                     ),
-                  if (userPhone.isNotEmpty)
+                  if (userPhone != null && userPhone!.isNotEmpty)
                     Text(
-                      userPhone,
+                      userPhone!,
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
                         color: Color.fromARGB(255, 105, 0, 0),

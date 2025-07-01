@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class JobDetailScreen extends StatelessWidget {
   const JobDetailScreen({super.key});
@@ -37,10 +38,7 @@ class JobDetailScreen extends StatelessWidget {
             style: GoogleFonts.montserrat(
                 color: Colors.black, fontWeight: FontWeight.bold)),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.bookmark_border, color: Colors.black),
-            onPressed: () {},
-          ),
+          BookmarkButton(job: job),
         ],
       ),
       body: Padding(
@@ -122,7 +120,8 @@ class JobDetailScreen extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => JobApplyScreen(
                             job: job.map(
-                                (k, v) => MapEntry(k, v?.toString() ?? ''))),
+                                    (k, v) => MapEntry(k, v?.toString() ?? ''))
+                                as Map<String, String>),
                       ),
                     );
                   },
@@ -139,6 +138,101 @@ class JobDetailScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// Bookmark button widget with Supabase integration
+class BookmarkButton extends StatefulWidget {
+  final Map<String, dynamic> job;
+  const BookmarkButton({Key? key, required this.job}) : super(key: key);
+
+  @override
+  State<BookmarkButton> createState() => _BookmarkButtonState();
+}
+
+class _BookmarkButtonState extends State<BookmarkButton> {
+  bool isBookmarked = false;
+  bool loading = false;
+  String? userId;
+  final supabase = Supabase.instance.client;
+
+  @override
+  void initState() {
+    super.initState();
+    userId = supabase.auth.currentUser?.id;
+    _checkIfBookmarked();
+  }
+
+  Future<void> _checkIfBookmarked() async {
+    if (userId == null || widget.job['id'] == null) return;
+    setState(() => loading = true);
+    final res = await supabase
+        .from('saved_jobs')
+        .select('id')
+        .eq('user_id', userId ?? '')
+        .eq('job_id', widget.job['id'])
+        .maybeSingle();
+    setState(() {
+      isBookmarked = res != null;
+      loading = false;
+    });
+  }
+
+  Future<void> _toggleBookmark() async {
+    if (userId == null || widget.job['id'] == null) return;
+    setState(() => loading = true);
+    if (isBookmarked) {
+      // Remove bookmark
+      await supabase
+          .from('saved_jobs')
+          .delete()
+          .eq('user_id', userId ?? '')
+          .eq('job_id', widget.job['id']);
+      setState(() {
+        isBookmarked = false;
+        loading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Job removed from saved'),
+              duration: Duration(seconds: 1)),
+        );
+      }
+    } else {
+      // Add bookmark
+      await supabase.from('saved_jobs').insert({
+        'user_id': userId ?? '',
+        'job_id': widget.job['id'],
+      });
+      setState(() {
+        isBookmarked = true;
+        loading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Job saved!'), duration: Duration(seconds: 1)),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: loading
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2))
+          : Icon(
+              isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              color: Colors.black,
+            ),
+      tooltip: isBookmarked ? 'Remove from saved' : 'Save job',
+      onPressed: loading ? null : _toggleBookmark,
     );
   }
 }

@@ -453,8 +453,7 @@ class _JobListScreenState extends State<JobListScreen> {
                                     ),
                                   ],
                                 ),
-                                trailing: Icon(Icons.bookmark_border,
-                                    color: Colors.amber[800]),
+                                // Removed bookmark icon from job list
                                 onTap: () {
                                   Navigator.pushNamed(
                                     context,

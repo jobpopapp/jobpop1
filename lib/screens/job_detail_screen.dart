@@ -3,8 +3,60 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jobpopp/widgets/custom_app_bar.dart';
 
-class JobDetailScreen extends StatelessWidget {
+class JobDetailScreen extends StatefulWidget {
   const JobDetailScreen({super.key});
+
+  @override
+  State<JobDetailScreen> createState() => _JobDetailScreenState();
+}
+
+class _JobDetailScreenState extends State<JobDetailScreen> {
+  String username = 'User';
+  String? userEmail;
+  String? userPhone;
+  String? profilePhotoUrl;
+  int _selectedIndex = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserProfile();
+  }
+
+  Future<void> fetchUserProfile() async {
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+    if (user != null) {
+      final profile = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
+      setState(() {
+        username = user.userMetadata?['full_name'] ??
+            user.userMetadata?['name'] ??
+            profile?['username'] ??
+            'User';
+        userEmail = user.userMetadata?['email'] ?? profile?['email'] ?? '';
+        userPhone = user.userMetadata?['phone'] ?? profile?['phone'] ?? '';
+        profilePhotoUrl =
+            user.userMetadata?['avatar_url'] ?? profile?['profile_photo_url'];
+      });
+    }
+  }
+
+  void _onNavTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 0) {
+      Navigator.pushReplacementNamed(context, '/profile');
+    } else if (index == 1) {
+      Navigator.pushReplacementNamed(context, '/job_list');
+    } else if (index == 2) {
+      Navigator.pushReplacementNamed(context, '/saved-jobs');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +82,6 @@ class JobDetailScreen extends StatelessWidget {
       };
     }
 
-    // You may want to get user info from a provider or pass as arguments for real apps
-    // For demo, use placeholders:
-    final String username = 'User';
-    final String? userEmail = null;
-    final String? userPhone = null;
-    final String? profilePhotoUrl = null;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
@@ -150,6 +196,18 @@ class JobDetailScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _selectedIndex,
+        onTap: _onNavTap,
+        selectedItemColor: Colors.amber[800],
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Jobs'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
+        ],
+      ),
     );
   }
 }
@@ -249,19 +307,72 @@ class _BookmarkButtonState extends State<BookmarkButton> {
   }
 }
 
-class JobApplyScreen extends StatelessWidget {
+class JobApplyScreen extends StatefulWidget {
   final Map<String, String> job;
   const JobApplyScreen({super.key, required this.job});
 
   @override
+  State<JobApplyScreen> createState() => _JobApplyScreenState();
+}
+
+class _JobApplyScreenState extends State<JobApplyScreen> {
+  String username = 'User';
+  String? userEmail;
+  String? userPhone;
+  String? profilePhotoUrl;
+  int _selectedIndex = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserProfile();
+  }
+
+  Future<void> fetchUserProfile() async {
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+    if (user != null) {
+      final profile = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
+      setState(() {
+        username = user.userMetadata?['full_name'] ??
+            user.userMetadata?['name'] ??
+            profile?['username'] ??
+            'User';
+        userEmail = user.userMetadata?['email'] ?? profile?['email'] ?? '';
+        userPhone = user.userMetadata?['phone'] ?? profile?['phone'] ?? '';
+        profilePhotoUrl =
+            user.userMetadata?['avatar_url'] ?? profile?['profile_photo_url'];
+      });
+    }
+  }
+
+  void _onNavTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 0) {
+      Navigator.pushReplacementNamed(context, '/profile');
+    } else if (index == 1) {
+      Navigator.pushReplacementNamed(context, '/job_list');
+    } else if (index == 2) {
+      Navigator.pushReplacementNamed(context, '/saved-jobs');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final job = widget.job;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        username: 'User',
-        userEmail: null,
-        userPhone: null,
-        profilePhotoUrl: null,
+        username: username,
+        userEmail: userEmail,
+        userPhone: userPhone,
+        profilePhotoUrl: profilePhotoUrl,
         backgroundColor: Colors.white,
       ),
       body: Padding(
@@ -293,6 +404,18 @@ class JobApplyScreen extends StatelessWidget {
                   style: GoogleFonts.montserrat()),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _selectedIndex,
+        onTap: _onNavTap,
+        selectedItemColor: Colors.amber[800],
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Jobs'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
+        ],
       ),
     );
   }

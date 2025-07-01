@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:jobpopp/widgets/custom_app_bar.dart';
 
 class JobDetailScreen extends StatelessWidget {
   const JobDetailScreen({super.key});
@@ -29,17 +30,23 @@ class JobDetailScreen extends StatelessWidget {
       };
     }
 
+    // You may want to get user info from a provider or pass as arguments for real apps
+    // For demo, use placeholders:
+    final String username = 'User';
+    final String? userEmail = null;
+    final String? userPhone = null;
+    final String? profilePhotoUrl = null;
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text('Job Details',
-            style: GoogleFonts.montserrat(
-                color: Colors.black, fontWeight: FontWeight.bold)),
+      appBar: CustomAppBar(
+        username: username,
+        userEmail: userEmail,
+        userPhone: userPhone,
+        profilePhotoUrl: profilePhotoUrl,
         actions: [
           BookmarkButton(job: job),
         ],
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -250,12 +257,12 @@ class JobApplyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      appBar: CustomAppBar(
+        username: 'User',
+        userEmail: null,
+        userPhone: null,
+        profilePhotoUrl: null,
         backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text('How to Apply',
-            style: GoogleFonts.montserrat(
-                color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),

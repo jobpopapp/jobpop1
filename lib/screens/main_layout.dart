@@ -43,13 +43,6 @@ class _JobPopMainLayoutState extends State<JobPopMainLayout> {
 
   List<Widget> get pages => [
         ProfileScreen(
-          username:
-              userProfile?['full_name'] ?? userProfile?['username'] ?? 'User',
-          userEmail: userProfile?['email'] ?? '',
-          userPhone: userProfile?['phone'] ?? '',
-          profilePhotoUrl: userProfile?['avatar_url'] ??
-              userProfile?['profile_photo_url'] ??
-              '',
           preferredLanguage: userProfile?['preferred_language'] ?? 'English',
           onToggleLanguage: () {
             // TODO: Implement language toggle logic

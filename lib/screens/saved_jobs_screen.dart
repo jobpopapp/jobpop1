@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:jobpopp/widgets/custom_app_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SavedJobsScreen extends StatefulWidget {
@@ -82,62 +83,11 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        titleSpacing: 16,
-        backgroundColor: const Color(0xFFFFD23F),
-        elevation: 0,
-        title: Row(
-          children: [
-            if (profilePhotoUrl != null && profilePhotoUrl!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: CircleAvatar(
-                  radius: 22,
-                  backgroundImage: NetworkImage(profilePhotoUrl!),
-                  backgroundColor: Colors.grey[200],
-                ),
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: CircleAvatar(
-                  radius: 22,
-                  backgroundColor: Colors.grey[300],
-                  child: Icon(Icons.person, color: Colors.white),
-                ),
-              ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    username.isNotEmpty ? username : 'User',
-                    style: GoogleFonts.montserrat(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  if (userEmail != null && userEmail!.isNotEmpty)
-                    Text(
-                      userEmail!,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        color: Color.fromARGB(255, 122, 0, 0),
-                      ),
-                    ),
-                  if (userPhone != null && userPhone!.isNotEmpty)
-                    Text(
-                      userPhone!,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        color: Color.fromARGB(255, 105, 0, 0),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      appBar: CustomAppBar(
+        username: username,
+        userEmail: userEmail,
+        userPhone: userPhone,
+        profilePhotoUrl: profilePhotoUrl,
         actions: [
           IconButton(
             onPressed: () {

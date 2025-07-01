@@ -154,7 +154,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                         trailing:
                             Icon(Icons.bookmark, color: Colors.amber[800]),
                         onTap: () {
-                          // Pass the job map to the detail screen, matching the expected structure
+                          // Map job_description to description for detail screen
                           Navigator.pushNamed(
                             context,
                             '/job_detail',
@@ -165,7 +165,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                               'salary': job['jobs:salary'],
                               'country': job['jobs:country'],
                               'deadline': job['jobs:deadline'],
-                              'description': job['jobs:description'],
+                              'description': job['jobs:job_description'],
                               'requirements': job['jobs:requirements'],
                               'email': job['jobs:email'],
                               'company_website': job['jobs:company_website'],

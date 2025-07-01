@@ -101,6 +101,11 @@ class JobDetailScreen extends StatelessWidget {
             // Show job description, fallback if missing
             if ((job['description'] ?? '').toString().trim().isNotEmpty)
               Text(job['description'], style: GoogleFonts.montserrat())
+            else if ((job['job_description'] ?? '')
+                .toString()
+                .trim()
+                .isNotEmpty)
+              Text(job['job_description'], style: GoogleFonts.montserrat())
             else
               Text('No description provided.',
                   style: GoogleFonts.montserrat(

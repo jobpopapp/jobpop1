@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jobpopp/widgets/custom_app_bar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class JobDetailScreen extends StatefulWidget {
   const JobDetailScreen({super.key});
@@ -153,12 +154,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
             // Show job description, fallback if missing
             if ((job['description'] ?? '').toString().trim().isNotEmpty)
-              Text(job['description'], style: GoogleFonts.montserrat())
+              Text(job['description'] ?? '', style: GoogleFonts.montserrat())
             else if ((job['job_description'] ?? '')
                 .toString()
                 .trim()
                 .isNotEmpty)
-              Text(job['job_description'], style: GoogleFonts.montserrat())
+              Text(job['job_description'] ?? '',
+                  style: GoogleFonts.montserrat())
             else
               Text('No description provided.',
                   style: GoogleFonts.montserrat(
@@ -168,7 +170,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
             Text(job['requirements'] ?? '', style: GoogleFonts.montserrat()),
             const SizedBox(height: 16),
-            if ((job['application_link'] ?? '').isNotEmpty)
+            if ((job['application_link'] ?? '').toString().isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ElevatedButton(
@@ -379,29 +381,178 @@ class _JobApplyScreenState extends State<JobApplyScreen> {
         padding: const EdgeInsets.all(24.0),
         child: ListView(
           children: [
-            Text('Hiring Company:',
-                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
-            Text(job['company'] ?? '', style: GoogleFonts.montserrat()),
-            const SizedBox(height: 8),
-            Text('Deadline:',
-                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
-            Text(job['deadline'] ?? '', style: GoogleFonts.montserrat()),
-            const SizedBox(height: 8),
-            Text('Requirements:',
-                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
-            Text(job['requirements'] ?? '', style: GoogleFonts.montserrat()),
-            const SizedBox(height: 8),
-            if ((job['email'] ?? '').isNotEmpty)
-              Text('Email: ${job['email']}', style: GoogleFonts.montserrat()),
-            if ((job['company_website'] ?? '').isNotEmpty)
-              Text('Website: ${job['company_website']}',
-                  style: GoogleFonts.montserrat()),
-            if ((job['application_link'] ?? '').isNotEmpty)
-              Text('Application Link: ${job['application_link']}',
-                  style: GoogleFonts.montserrat()),
-            if ((job['contact_phone'] ?? '').isNotEmpty)
-              Text('Contact Phone: ${job['contact_phone']}',
-                  style: GoogleFonts.montserrat()),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0, bottom: 4.0),
+              child: Text(
+                'Hiring Company:',
+                style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.bold, height: 1.2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                job['company'] ?? '',
+                style: GoogleFonts.montserrat(height: 1.2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Text(
+                'Deadline:',
+                style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.bold, height: 1.2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                job['deadline'] ?? '',
+                style: GoogleFonts.montserrat(height: 1.2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Text(
+                'Requirements:',
+                style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.bold, height: 1.2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                job['requirements'] ?? '',
+                style: GoogleFonts.montserrat(height: 1.2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Text(
+                'HOW TO APPLY:',
+                style: GoogleFonts.montserrat(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  height: 1.2,
+                ),
+              ),
+            ),
+            if ((job['email'] ?? '').toString().isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Text(
+                  'Email:',
+                  style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.bold, height: 1.2),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  final email = job['email'];
+                  if (email != null) {
+                    launchUrl(Uri.parse('mailto:$email'));
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    job['email'] ?? '',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if ((job['company_website'] ?? '').toString().isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Text(
+                  'Website:',
+                  style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.bold, height: 1.2),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  final url = job['company_website'];
+                  if (url != null) {
+                    launchUrl(Uri.parse(url));
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    job['company_website'] ?? '',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if ((job['application_link'] ?? '').toString().isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Text(
+                  'Application Link:',
+                  style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.bold, height: 1.2),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  final url = job['application_link'];
+                  if (url != null) {
+                    launchUrl(Uri.parse(url));
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    job['application_link'] ?? '',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if ((job['contact_phone'] ?? '').toString().isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Text(
+                  'Contact Phone:',
+                  style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.bold, height: 1.2),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  final phone = job['contact_phone'];
+                  if (phone != null) {
+                    launchUrl(Uri.parse('tel:$phone'));
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    job['contact_phone'] ?? '',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

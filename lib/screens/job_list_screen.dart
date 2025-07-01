@@ -21,7 +21,7 @@ class _JobListScreenState extends State<JobListScreen> {
   List<Map<String, dynamic>> jobs = [];
   bool isLoading = true;
   String _selectedLocation = 'Abroad';
-  String? _selectedCategory;
+  String? _selectedCategory = 'All Jobs';
 
   @override
   void initState() {
@@ -110,8 +110,8 @@ class _JobListScreenState extends State<JobListScreen> {
     debugPrint('fetchJobs() called');
     try {
       debugPrint('Fetching jobs...');
-      debugPrint('Selected location: $_selectedLocation');
-      debugPrint('Selected category: $_selectedCategory');
+      debugPrint('Selected location: \\$_selectedLocation');
+      debugPrint('Selected category: \\$_selectedCategory');
       var query =
           supabase.from('jobs').select().order('deadline', ascending: true);
       bool filterAbroadClientSide = false;
@@ -124,8 +124,10 @@ class _JobListScreenState extends State<JobListScreen> {
         filterAbroadClientSide = true;
         // Do not add any country filter to the query
       }
-      if (_selectedCategory != null && _selectedCategory!.isNotEmpty) {
-        debugPrint('Applying filter: category == $_selectedCategory');
+      if (_selectedCategory != null &&
+          _selectedCategory != 'All Jobs' &&
+          _selectedCategory!.isNotEmpty) {
+        debugPrint('Applying filter: category == \\$_selectedCategory');
         query = (query as dynamic).eq('category', _selectedCategory);
       }
       final response = await query;
@@ -284,12 +286,15 @@ class _JobListScreenState extends State<JobListScreen> {
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               decoration: InputDecoration(
-                labelText: 'Job Category *',
+                labelText: 'Job Category',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
               items: const [
+                DropdownMenuItem(
+                    value: 'All Jobs',
+                    child: Text('All Jobs', style: TextStyle(fontSize: 12))),
                 DropdownMenuItem(
                     value: 'Domestic Work',
                     child: Text('Domestic Work (Housekeeping, Nanny, Maid)',

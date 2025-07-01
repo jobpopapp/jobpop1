@@ -28,20 +28,27 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;
     if (user == null) {
+      debugPrint('No logged in user.');
       setState(() {
         _savedJobs = [];
         _loading = false;
       });
       return;
     }
+    debugPrint('Logged in user id: \\${user.id}');
     final response = await supabase
-        .from('saved_jobs') // Table name matches job details page
+        .from('saved_jobs')
         .select(
-            'job_id, jobs:title, jobs:company, jobs:salary, jobs:country, jobs:deadline, jobs:description, jobs:requirements, jobs:email, jobs:company_website, jobs:application_link, jobs:contact_phone')
+            'job_id, jobs:title, jobs:company, jobs:salary, jobs:country, jobs:deadline, jobs:job_description, jobs:requirements, jobs:email, jobs:company_website, jobs:application_link, jobs:contact_phone')
         .eq('user_id', user.id)
         .order('id', ascending: false);
+    final jobsList = List<Map<String, dynamic>>.from(response);
+    debugPrint('Fetched saved jobs: \\${jobsList.length}');
+    for (final job in jobsList) {
+      debugPrint('Saved job: \\${job.toString()}');
+    }
     setState(() {
-      _savedJobs = List<Map<String, dynamic>>.from(response);
+      _savedJobs = jobsList;
       _loading = false;
     });
   }

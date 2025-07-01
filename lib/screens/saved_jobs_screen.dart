@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SavedJobsScreen extends StatefulWidget {
   const SavedJobsScreen({Key? key}) : super(key: key);
@@ -10,33 +11,43 @@ class SavedJobsScreen extends StatefulWidget {
 
 class _SavedJobsScreenState extends State<SavedJobsScreen> {
   int _selectedIndex = 2;
+  List<Map<String, dynamic>> _savedJobs = [];
+  bool _loading = true;
+  String username = 'User';
+  String userEmail = '';
+  String userPhone = '';
+  String? profilePhotoUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSavedJobs();
+  }
+
+  Future<void> _fetchSavedJobs() async {
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      setState(() {
+        _savedJobs = [];
+        _loading = false;
+      });
+      return;
+    }
+    final response = await supabase
+        .from('saved_jobs') // Table name matches job details page
+        .select(
+            'job_id, jobs:title, jobs:company, jobs:salary, jobs:country, jobs:deadline, jobs:description, jobs:requirements, jobs:email, jobs:company_website, jobs:application_link, jobs:contact_phone')
+        .eq('user_id', user.id)
+        .order('id', ascending: false);
+    setState(() {
+      _savedJobs = List<Map<String, dynamic>>.from(response);
+      _loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Replace with real saved jobs from Supabase
-    final List<Map<String, String>> savedJobs = [
-      {
-        'title': 'Housekeeper',
-        'company': 'Kampala Homes',
-        'salary': 'UGX 400,000',
-        'country': 'Uganda',
-        'deadline': '2025-07-15',
-      },
-      {
-        'title': 'Driver',
-        'company': 'Safe Transport',
-        'salary': 'UGX 600,000',
-        'country': 'Uganda',
-        'deadline': '2025-07-20',
-      },
-    ];
-
-    // Mock user info for AppBar (replace with real user data if available)
-    final String username = 'User';
-    final String? userEmail = '';
-    final String? userPhone = '';
-    final String? profilePhotoUrl = null;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -45,12 +56,12 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
         elevation: 0,
         title: Row(
           children: [
-            if (profilePhotoUrl != null && profilePhotoUrl.isNotEmpty)
+            if (profilePhotoUrl != null && profilePhotoUrl!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: CircleAvatar(
                   radius: 22,
-                  backgroundImage: NetworkImage(profilePhotoUrl),
+                  backgroundImage: NetworkImage(profilePhotoUrl!),
                   backgroundColor: Colors.grey[200],
                 ),
               )
@@ -74,7 +85,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  if (userEmail != null && userEmail.isNotEmpty)
+                  if (userEmail.isNotEmpty)
                     Text(
                       userEmail,
                       style: GoogleFonts.montserrat(
@@ -82,7 +93,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                         color: Color.fromARGB(255, 122, 0, 0),
                       ),
                     ),
-                  if (userPhone != null && userPhone.isNotEmpty)
+                  if (userPhone.isNotEmpty)
                     Text(
                       userPhone,
                       style: GoogleFonts.montserrat(
@@ -105,46 +116,68 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
           ),
         ],
       ),
-      body: savedJobs.isEmpty
-          ? Center(
-              child: Text('No saved jobs yet.',
-                  style: GoogleFonts.montserrat(fontSize: 16)),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: savedJobs.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final job = savedJobs[index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  child: ListTile(
-                    title: Text(job['title'] ?? '',
-                        style: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.bold)),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(job['company'] ?? '',
-                            style: GoogleFonts.montserrat()),
-                        Text('Salary: ${job['salary']}',
-                            style: GoogleFonts.montserrat(fontSize: 12)),
-                        Text('Country: ${job['country']}',
-                            style: GoogleFonts.montserrat(fontSize: 12)),
-                        Text('Deadline: ${job['deadline']}',
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _savedJobs.isEmpty
+              ? Center(
+                  child: Text('No saved jobs yet.',
+                      style: GoogleFonts.montserrat(fontSize: 16)),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _savedJobs.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final job = _savedJobs[index];
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                        title: Text(job['jobs:title'] ?? '',
                             style: GoogleFonts.montserrat(
-                                fontSize: 12, color: Colors.red)),
-                      ],
-                    ),
-                    trailing: Icon(Icons.bookmark, color: Colors.amber[800]),
-                    onTap: () {
-                      // TODO: Navigate to job detail
-                    },
-                  ),
-                );
-              },
-            ),
+                                fontWeight: FontWeight.bold)),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(job['jobs:company'] ?? '',
+                                style: GoogleFonts.montserrat()),
+                            Text('Salary: ${job['jobs:salary'] ?? ''}',
+                                style: GoogleFonts.montserrat(fontSize: 12)),
+                            Text('Country: ${job['jobs:country'] ?? ''}',
+                                style: GoogleFonts.montserrat(fontSize: 12)),
+                            Text('Deadline: ${job['jobs:deadline'] ?? ''}',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 12, color: Colors.red)),
+                          ],
+                        ),
+                        trailing:
+                            Icon(Icons.bookmark, color: Colors.amber[800]),
+                        onTap: () {
+                          // Pass the job map to the detail screen, matching the expected structure
+                          Navigator.pushNamed(
+                            context,
+                            '/job_detail',
+                            arguments: {
+                              'id': job['job_id'],
+                              'title': job['jobs:title'],
+                              'company': job['jobs:company'],
+                              'salary': job['jobs:salary'],
+                              'country': job['jobs:country'],
+                              'deadline': job['jobs:deadline'],
+                              'description': job['jobs:description'],
+                              'requirements': job['jobs:requirements'],
+                              'email': job['jobs:email'],
+                              'company_website': job['jobs:company_website'],
+                              'application_link': job['jobs:application_link'],
+                              'contact_phone': job['jobs:contact_phone'],
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,

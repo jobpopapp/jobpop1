@@ -35,17 +35,17 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
       });
       return;
     }
-    debugPrint('Logged in user id: \\${user.id}');
+    debugPrint('Logged in user id: ${user.id}');
     final response = await supabase
         .from('saved_jobs')
         .select(
-            'job_id, jobs:title, jobs:company, jobs:salary, jobs:country, jobs:deadline, jobs:job_description, jobs:requirements, jobs:email, jobs:company_website, jobs:application_link, jobs:contact_phone')
+            'job_id,jobs(title,company,salary,country,deadline,job_description,requirements,email,company_website,application_link,contact_phone)')
         .eq('user_id', user.id)
         .order('id', ascending: false);
     final jobsList = List<Map<String, dynamic>>.from(response);
-    debugPrint('Fetched saved jobs: \\${jobsList.length}');
+    debugPrint('Fetched saved jobs: ${jobsList.length}');
     for (final job in jobsList) {
-      debugPrint('Saved job: \\${job.toString()}');
+      debugPrint('Saved job: ${job.toString()}');
     }
     setState(() {
       _savedJobs = jobsList;
@@ -141,19 +141,19 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
-                        title: Text(job['jobs:title'] ?? '',
+                        title: Text(job['jobs']?['title'] ?? '',
                             style: GoogleFonts.montserrat(
                                 fontWeight: FontWeight.bold)),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(job['jobs:company'] ?? '',
+                            Text(job['jobs']?['company'] ?? '',
                                 style: GoogleFonts.montserrat()),
-                            Text('Salary: ${job['jobs:salary'] ?? ''}',
+                            Text('Salary: ${job['jobs']?['salary'] ?? ''}',
                                 style: GoogleFonts.montserrat(fontSize: 12)),
-                            Text('Country: ${job['jobs:country'] ?? ''}',
+                            Text('Country: ${job['jobs']?['country'] ?? ''}',
                                 style: GoogleFonts.montserrat(fontSize: 12)),
-                            Text('Deadline: ${job['jobs:deadline'] ?? ''}',
+                            Text('Deadline: ${job['jobs']?['deadline'] ?? ''}',
                                 style: GoogleFonts.montserrat(
                                     fontSize: 12, color: Colors.red)),
                           ],
@@ -161,23 +161,24 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                         trailing:
                             Icon(Icons.bookmark, color: Colors.amber[800]),
                         onTap: () {
-                          // Map job_description to description for detail screen
+                          // Map nested jobs fields for detail screen
+                          final jobData = job['jobs'] ?? {};
                           Navigator.pushNamed(
                             context,
                             '/job_detail',
                             arguments: {
                               'id': job['job_id'],
-                              'title': job['jobs:title'],
-                              'company': job['jobs:company'],
-                              'salary': job['jobs:salary'],
-                              'country': job['jobs:country'],
-                              'deadline': job['jobs:deadline'],
-                              'description': job['jobs:job_description'],
-                              'requirements': job['jobs:requirements'],
-                              'email': job['jobs:email'],
-                              'company_website': job['jobs:company_website'],
-                              'application_link': job['jobs:application_link'],
-                              'contact_phone': job['jobs:contact_phone'],
+                              'title': jobData['title'],
+                              'company': jobData['company'],
+                              'salary': jobData['salary'],
+                              'country': jobData['country'],
+                              'deadline': jobData['deadline'],
+                              'description': jobData['job_description'],
+                              'requirements': jobData['requirements'],
+                              'email': jobData['email'],
+                              'company_website': jobData['company_website'],
+                              'application_link': jobData['application_link'],
+                              'contact_phone': jobData['contact_phone'],
                             },
                           );
                         },

@@ -404,8 +404,9 @@ class _JobListScreenState extends State<JobListScreen> {
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(job['company'] ?? '',
-                                        style: GoogleFonts.montserrat()),
+                                    Text('Category: ${job['category'] ?? ''}',
+                                        style: GoogleFonts.montserrat(
+                                            fontSize: 12)),
                                     Text('Salary: ${job['salary'] ?? ''}',
                                         style: GoogleFonts.montserrat(
                                             fontSize: 12)),
@@ -418,9 +419,38 @@ class _JobListScreenState extends State<JobListScreen> {
                                       Text('City: ${job['city']}',
                                           style: GoogleFonts.montserrat(
                                               fontSize: 12)),
-                                    Text('Deadline: ${job['deadline'] ?? ''}',
-                                        style: GoogleFonts.montserrat(
-                                            fontSize: 12, color: Colors.red)),
+                                    // Deadline: bold, red if past, green if future
+                                    Builder(
+                                      builder: (context) {
+                                        final deadlineStr =
+                                            job['deadline'] ?? '';
+                                        DateTime? deadline;
+                                        try {
+                                          if (deadlineStr is String &&
+                                              deadlineStr.isNotEmpty) {
+                                            deadline =
+                                                DateTime.tryParse(deadlineStr);
+                                          }
+                                        } catch (_) {}
+                                        final now = DateTime.now();
+                                        final isPast = deadline != null &&
+                                            deadline.isBefore(now);
+                                        return Text(
+                                          'Deadline: $deadlineStr',
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: deadline == null
+                                                ? Colors.black
+                                                : isPast
+                                                    ? const Color.fromARGB(
+                                                        255, 187, 27, 16)
+                                                    : const Color.fromARGB(
+                                                        255, 41, 145, 44),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ],
                                 ),
                                 trailing: Icon(Icons.bookmark_border,

@@ -56,8 +56,31 @@ class JobDetailScreen extends StatelessWidget {
                 style: GoogleFonts.montserrat()),
             Text('Country: ${job['country']}', style: GoogleFonts.montserrat()),
             Text('Salary: ${job['salary']}', style: GoogleFonts.montserrat()),
-            Text('Deadline: ${job['deadline']}',
-                style: GoogleFonts.montserrat()),
+            // Deadline: bold, red if past, green if future
+            Builder(
+              builder: (context) {
+                final deadlineStr = job['deadline'] ?? '';
+                DateTime? deadline;
+                try {
+                  if (deadlineStr is String && deadlineStr.isNotEmpty) {
+                    deadline = DateTime.tryParse(deadlineStr);
+                  }
+                } catch (_) {}
+                final now = DateTime.now();
+                final isPast = deadline != null && deadline.isBefore(now);
+                return Text(
+                  'Deadline: $deadlineStr',
+                  style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.bold,
+                    color: deadline == null
+                        ? Colors.black
+                        : isPast
+                            ? Colors.red
+                            : Colors.green,
+                  ),
+                );
+              },
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -77,7 +100,13 @@ class JobDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text('Job Description',
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
-            Text(job['description'] ?? '', style: GoogleFonts.montserrat()),
+            // Show job description, fallback if missing
+            if ((job['description'] ?? '').toString().trim().isNotEmpty)
+              Text(job['description'], style: GoogleFonts.montserrat())
+            else
+              Text('No description provided.',
+                  style: GoogleFonts.montserrat(
+                      fontStyle: FontStyle.italic, color: Colors.grey)),
             const SizedBox(height: 16),
             Text('Requirements',
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),

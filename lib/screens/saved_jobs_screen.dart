@@ -112,23 +112,41 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                       const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final job = _savedJobs[index];
+                    final jobData = job['jobs'] ?? {};
+                    // Compose a job map with all fields needed by the detail screen
+                    final detailJob = <String, dynamic>{
+                      'id': job['job_id'],
+                      'title': jobData['title'],
+                      'company': jobData['company'],
+                      'salary': jobData['salary'],
+                      'country': jobData['country'],
+                      'deadline': jobData['deadline'],
+                      'description':
+                          jobData['job_description'] ?? jobData['description'],
+                      'requirements': jobData['requirements'],
+                      'email': jobData['email'],
+                      'company_website': jobData['company_website'],
+                      'application_link': jobData['application_link'],
+                      'contact_phone': jobData['contact_phone'],
+                      'category': jobData['category'],
+                    };
                     return Card(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
-                        title: Text(job['jobs']?['title'] ?? '',
+                        title: Text(jobData['title'] ?? '',
                             style: GoogleFonts.montserrat(
                                 fontWeight: FontWeight.bold)),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(job['jobs']?['company'] ?? '',
+                            Text(jobData['company'] ?? '',
                                 style: GoogleFonts.montserrat()),
-                            Text('Salary: ${job['jobs']?['salary'] ?? ''}',
+                            Text('Salary: ${jobData['salary'] ?? ''}',
                                 style: GoogleFonts.montserrat(fontSize: 12)),
-                            Text('Country: ${job['jobs']?['country'] ?? ''}',
+                            Text('Country: ${jobData['country'] ?? ''}',
                                 style: GoogleFonts.montserrat(fontSize: 12)),
-                            Text('Deadline: ${job['jobs']?['deadline'] ?? ''}',
+                            Text('Deadline: ${jobData['deadline'] ?? ''}',
                                 style: GoogleFonts.montserrat(
                                     fontSize: 12, color: Colors.red)),
                           ],
@@ -136,25 +154,10 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                         trailing:
                             Icon(Icons.bookmark, color: Colors.amber[800]),
                         onTap: () {
-                          // Map nested jobs fields for detail screen
-                          final jobData = job['jobs'] ?? {};
                           Navigator.pushNamed(
                             context,
                             '/job_detail',
-                            arguments: {
-                              'id': job['job_id'],
-                              'title': jobData['title'],
-                              'company': jobData['company'],
-                              'salary': jobData['salary'],
-                              'country': jobData['country'],
-                              'deadline': jobData['deadline'],
-                              'description': jobData['job_description'],
-                              'requirements': jobData['requirements'],
-                              'email': jobData['email'],
-                              'company_website': jobData['company_website'],
-                              'application_link': jobData['application_link'],
-                              'contact_phone': jobData['contact_phone'],
-                            },
+                            arguments: detailJob,
                           );
                         },
                       ),

@@ -1,15 +1,1 @@
-{
-  "hosting": [
-    {
-      "site": "jobpop",
-      "public": "build/web",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    }
-  ]
-}
+{"hosting":[{"site":"jobpop","public":"build/web","ignore":["firebase.json","**/.*","**/node_modules/**"],"rewrites":[{"source":"**","destination":"/index.html"}]}],"flutter":{"platforms":{"android":{"default":{"projectId":"jobpop-464001","appId":"1:998086120823:android:a1db6dab319b731fc2bd72","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"jobpop-464001","configurations":{"android":"1:998086120823:android:a1db6dab319b731fc2bd72","ios":"1:998086120823:ios:d80ce6b570abe0f0c2bd72","macos":"1:998086120823:ios:d80ce6b570abe0f0c2bd72","web":"1:998086120823:web:7177eca055c90790c2bd72","windows":"1:998086120823:web:0267ffdd5f85750cc2bd72"}}}}}}

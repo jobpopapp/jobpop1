@@ -150,13 +150,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 Color statusBg;
                 Color statusTextColor = Colors.white;
                 if (deadline == null) {
-                  statusText = t('status', lang) + ': ' + t('unknown', lang);
+                  statusText = t('', lang) + t('unknown', lang);
                   statusBg = Colors.grey;
                 } else if (isPast) {
-                  statusText = t('', lang) + ': ' + t('Expired', lang);
+                  statusText = t('', lang) + t('Expired', lang);
                   statusBg = Colors.red;
                 } else {
-                  statusText = t('', lang) + ': ' + t('Active', lang);
+                  statusText = t('', lang) + t('Active', lang);
                   statusBg = Colors.green;
                 }
 

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "998086120823",
+    "project_id": "jobpop-464001",
+    "storage_bucket": "jobpop-464001.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:998086120823:android:a1db6dab319b731fc2bd72",
+        "android_client_info": {
+          "package_name": "com.example.jobpopp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "998086120823-8sc67lt7a9nfev174ia8ca1tarr2ff76.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCV8DaSEEB1QqoWpBXIEHRI22OliPUUTUM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "998086120823-8sc67lt7a9nfev174ia8ca1tarr2ff76.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

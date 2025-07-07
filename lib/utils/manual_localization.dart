@@ -91,6 +91,10 @@ const Map<String, Map<String, String>> kTranslations = {
   },
   'cancel': {'en': 'Cancel', 'lg': 'Sazaamu'},
   'logoutButton': {'en': 'Logout', 'lg': 'Vamu'},
+  'footerNote': {
+    'en': 'This app is safe and regulated by the Government of Uganda',
+    'lg': 'Eno app yesigika era elondolwa Gavumenti ya Uganda'
+  },
 };
 
 String t(String key, String lang) {

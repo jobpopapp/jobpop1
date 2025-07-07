@@ -17,19 +17,19 @@ import 'dart:ui';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   // Initialize Supabase
   await Supabase.initialize(
     url: 'https://snokjbcheiivdrafmtyc.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNub2tqYmNoZWlpdmRyYWZtdHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Njc0MjQsImV4cCI6MjA2NjM0MzQyNH0.K6AGHXAKno8fBJwgGvWR-7eN0C8qs3OmoZPsqxfylzM',
   );
-  
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => LanguageProvider()..loadLocale(),
@@ -43,8 +43,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lang =
-        Provider.of<LanguageProvider>(context).locale.languageCode;
+    final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     return MaterialApp(
       title: t('appTitle', lang),
       theme: ThemeData(
@@ -100,8 +99,7 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lang =
-        Provider.of<LanguageProvider>(context).locale.languageCode;
+    final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(

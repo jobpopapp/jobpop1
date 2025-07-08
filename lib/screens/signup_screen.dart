@@ -214,7 +214,8 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'https://jobpop.web.app/#/signup',
+        redirectTo: 'jobpopp://auth-callback',
+        authScreenLaunchMode: LaunchMode.externalApplication,
       );
       // Do not upsert profile here! It will be handled in onAuthStateChange after redirect.
     } catch (e) {

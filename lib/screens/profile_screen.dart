@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jobpopp/widgets/custom_app_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../utils/manual_localization.dart';
 import '../utils/language_provider.dart';
@@ -36,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .eq('id', user.id)
           .maybeSingle();
       setState(() {
+        // Prefer Google Auth metadata if available, else fallback to profiles table
         username = user.userMetadata?['full_name'] ??
             user.userMetadata?['name'] ??
             profile?['username'] ??
@@ -45,6 +47,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         profilePhotoUrl =
             user.userMetadata?['avatar_url'] ?? profile?['profile_photo_url'];
       });
+    } else {
+      // Phone-only login: get id/username/phone from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final phone = prefs.getString('phone_login');
+      if (phone != null && phone.isNotEmpty) {
+        final profile = await supabase
+            .from('profiles')
+            .select()
+            .eq('phone', phone)
+            .maybeSingle();
+        setState(() {
+          username = profile?['username'] ?? 'User';
+          userEmail = profile?['email'] ?? '';
+          userPhone = profile?['phone'] ?? '';
+          profilePhotoUrl = profile?['profile_photo_url'];
+        });
+      }
     }
   }
 

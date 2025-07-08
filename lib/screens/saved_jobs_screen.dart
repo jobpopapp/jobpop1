@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jobpopp/widgets/custom_app_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../utils/manual_localization.dart';
 import '../utils/language_provider.dart';
@@ -39,6 +40,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
           .eq('id', user.id)
           .maybeSingle();
       setState(() {
+        // Prefer Google Auth metadata if available, else fallback to profiles table
         username = user.userMetadata?['full_name'] ??
             user.userMetadata?['name'] ??
             profile?['username'] ??
@@ -49,37 +51,87 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
             user.userMetadata?['avatar_url'] ?? profile?['profile_photo_url'];
       });
     } else {
-      // Optionally handle phone-only login with SharedPreferences if needed
+      // Phone-only login: get id/username/phone from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final phone = prefs.getString('phone_login');
+      if (phone != null && phone.isNotEmpty) {
+        final profile = await supabase
+            .from('profiles')
+            .select()
+            .eq('phone', phone)
+            .maybeSingle();
+        setState(() {
+          username = profile?['username'] ?? 'User';
+          userEmail = profile?['email'] ?? '';
+          userPhone = profile?['phone'] ?? '';
+          profilePhotoUrl = profile?['profile_photo_url'];
+        });
+      }
     }
   }
 
   Future<void> _fetchSavedJobs() async {
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;
-    if (user == null) {
-      debugPrint('No logged in user.');
+    
+    String? userId;
+    String? userPhone;
+    
+    if (user != null) {
+      // Google Auth user
+      userId = user.id;
+      debugPrint('Logged in user id: ${user.id}');
+    } else {
+      // Phone-only login: get phone from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      userPhone = prefs.getString('phone_login');
+      if (userPhone == null || userPhone.isEmpty) {
+        debugPrint('No logged in user.');
+        setState(() {
+          _savedJobs = [];
+          _loading = false;
+        });
+        return;
+      }
+      debugPrint('Phone-only user: $userPhone');
+    }
+    
+    try {
+      List<Map<String, dynamic>> response;
+      
+      if (userId != null) {
+        // Query by user_id for Google Auth users
+        response = List<Map<String, dynamic>>.from(await supabase
+            .from('saved_jobs')
+            .select(
+                'job_id,jobs(title,company,salary,country,deadline,job_description,requirements,email,company_website,application_link,contact_phone)')
+            .eq('user_id', userId)
+            .order('id', ascending: false));
+      } else {
+        // Query by phone for phone-only users
+        response = List<Map<String, dynamic>>.from(await supabase
+            .from('saved_jobs')
+            .select(
+                'job_id,jobs(title,company,salary,country,deadline,job_description,requirements,email,company_website,application_link,contact_phone)')
+            .eq('user_phone', userPhone!)
+            .order('id', ascending: false));
+      }
+      
+      debugPrint('Fetched saved jobs: ${response.length}');
+      for (final job in response) {
+        debugPrint('Saved job: ${job.toString()}');
+      }
+      setState(() {
+        _savedJobs = response;
+        _loading = false;
+      });
+    } catch (e) {
+      debugPrint('Error fetching saved jobs: $e');
       setState(() {
         _savedJobs = [];
         _loading = false;
       });
-      return;
     }
-    debugPrint('Logged in user id: ${user.id}');
-    final response = await supabase
-        .from('saved_jobs')
-        .select(
-            'job_id,jobs(title,company,salary,country,deadline,job_description,requirements,email,company_website,application_link,contact_phone)')
-        .eq('user_id', user.id)
-        .order('id', ascending: false);
-    final jobsList = List<Map<String, dynamic>>.from(response);
-    debugPrint('Fetched saved jobs: ${jobsList.length}');
-    for (final job in jobsList) {
-      debugPrint('Saved job: ${job.toString()}');
-    }
-    setState(() {
-      _savedJobs = jobsList;
-      _loading = false;
-    });
   }
 
   @override

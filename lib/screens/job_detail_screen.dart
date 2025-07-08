@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jobpopp/widgets/custom_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../utils/manual_localization.dart';
 import '../utils/language_provider.dart';
@@ -286,24 +287,44 @@ class _BookmarkButtonState extends State<BookmarkButton> {
   bool isBookmarked = false;
   bool loading = false;
   String? userId;
+  String? userPhone;
   final supabase = Supabase.instance.client;
 
   @override
   void initState() {
     super.initState();
-    userId = supabase.auth.currentUser?.id;
+    _initializeUser();
+  }
+
+  Future<void> _initializeUser() async {
+    final user = supabase.auth.currentUser;
+    if (user != null) {
+      // Google Auth user
+      userId = user.id;
+    } else {
+      // Phone-only user
+      final prefs = await SharedPreferences.getInstance();
+      userPhone = prefs.getString('phone_login');
+    }
     _checkIfBookmarked();
   }
 
   Future<void> _checkIfBookmarked() async {
-    if (userId == null || widget.job['id'] == null) return;
+    if ((userId == null && userPhone == null) || widget.job['id'] == null) return;
     setState(() => loading = true);
-    final res = await supabase
-        .from('saved_jobs')
-        .select('id')
-        .eq('user_id', userId ?? '')
-        .eq('job_id', widget.job['id'])
-        .maybeSingle();
+    
+    final query = supabase.from('saved_jobs').select('id');
+    
+    if (userId != null) {
+      // Query by user_id for Google Auth users
+      query.eq('user_id', userId!);
+    } else {
+      // Query by user_phone for phone-only users
+      query.eq('user_phone', userPhone!);
+    }
+    
+    final res = await query.eq('job_id', widget.job['id']).maybeSingle();
+    
     setState(() {
       isBookmarked = res != null;
       loading = false;
@@ -311,15 +332,21 @@ class _BookmarkButtonState extends State<BookmarkButton> {
   }
 
   Future<void> _toggleBookmark() async {
-    if (userId == null || widget.job['id'] == null) return;
+    if ((userId == null && userPhone == null) || widget.job['id'] == null) return;
     setState(() => loading = true);
+    
     if (isBookmarked) {
       // Remove bookmark
-      await supabase
-          .from('saved_jobs')
-          .delete()
-          .eq('user_id', userId ?? '')
-          .eq('job_id', widget.job['id']);
+      final deleteQuery = supabase.from('saved_jobs').delete();
+      
+      if (userId != null) {
+        deleteQuery.eq('user_id', userId!);
+      } else {
+        deleteQuery.eq('user_phone', userPhone!);
+      }
+      
+      await deleteQuery.eq('job_id', widget.job['id']);
+      
       setState(() {
         isBookmarked = false;
         loading = false;
@@ -333,10 +360,18 @@ class _BookmarkButtonState extends State<BookmarkButton> {
       }
     } else {
       // Add bookmark
-      await supabase.from('saved_jobs').insert({
-        'user_id': userId ?? '',
+      final insertData = <String, dynamic>{
         'job_id': widget.job['id'],
-      });
+      };
+      
+      if (userId != null) {
+        insertData['user_id'] = userId!;
+      } else {
+        insertData['user_phone'] = userPhone!;
+      }
+      
+      await supabase.from('saved_jobs').insert(insertData);
+      
       setState(() {
         isBookmarked = true;
         loading = false;

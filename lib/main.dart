@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:app_links/app_links.dart';
 import 'utils/language_provider.dart';
 import 'utils/manual_localization.dart';
 import 'screens/login_screen.dart';
@@ -44,8 +45,61 @@ void main() async {
   FlutterNativeSplash.remove();
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final _appLinks = AppLinks();
+
+  @override
+  void initState() {
+    super.initState();
+    _handleIncomingLinks();
+  }
+
+  void _handleIncomingLinks() {
+    // Handle incoming links when app is already running
+    _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
+    }, onError: (err) {
+      print('Deep link error: $err');
+    });
+
+    // Handle initial link if app was launched from a link
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) {
+        _handleDeepLink(uri);
+      }
+    });
+  }
+
+  void _handleDeepLink(Uri uri) {
+    print('Received deep link: $uri');
+    
+    // Handle Supabase OAuth redirect
+    if (uri.scheme == 'jobpopp') {
+      print('Handling jobpopp deep link: $uri');
+      
+      try {
+        // Handle auth callback specifically
+        if (uri.host == 'auth-callback' || uri.path.contains('auth-callback')) {
+          print('Processing auth callback from URL: $uri');
+          Supabase.instance.client.auth.getSessionFromUrl(uri);
+        } else if (uri.fragment.isNotEmpty || uri.queryParameters.isNotEmpty) {
+          print('Processing auth session from URL: $uri');
+          Supabase.instance.client.auth.getSessionFromUrl(uri);
+        } else {
+          print('Deep link received but no auth parameters found');
+        }
+      } catch (e) {
+        print('Error processing deep link: $e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

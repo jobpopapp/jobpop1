@@ -52,7 +52,8 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'https://jobpop.web.app/#/login',
+        redirectTo: 'jobpopp://auth-callback',
+        authScreenLaunchMode: LaunchMode.externalApplication,
       );
       // The onAuthStateChange listener in initState will handle navigation after sign-in
     } catch (error) {

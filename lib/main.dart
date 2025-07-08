@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'utils/language_provider.dart';
 import 'utils/manual_localization.dart';
 import 'screens/login_screen.dart';
@@ -16,7 +17,9 @@ import 'screens/profile_screen.dart';
 import 'dart:ui';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // Keep the splash screen visible during initialization
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Initialize Firebase
   await Firebase.initializeApp(
@@ -36,6 +39,9 @@ void main() async {
       child: const MyApp(),
     ),
   );
+
+  // Remove the splash screen once the app is ready
+  FlutterNativeSplash.remove();
 }
 
 class MyApp extends StatelessWidget {

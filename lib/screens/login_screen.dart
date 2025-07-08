@@ -24,17 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
-      final event = data.event;
-      final session = data.session;
-      if (event == AuthChangeEvent.signedIn && session != null) {
-        if (mounted) {
-          Navigator.of(context, rootNavigator: true)
-              .popUntil((route) => route.isFirst);
-          Navigator.pushReplacementNamed(context, '/job_list');
-        }
-      }
-    });
+    // Auth state change is now handled globally in main.dart
   }
 
   @override

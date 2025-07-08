@@ -310,11 +310,12 @@ class _BookmarkButtonState extends State<BookmarkButton> {
   }
 
   Future<void> _checkIfBookmarked() async {
-    if ((userId == null && userPhone == null) || widget.job['id'] == null) return;
+    if ((userId == null && userPhone == null) || widget.job['id'] == null)
+      return;
     setState(() => loading = true);
-    
+
     final query = supabase.from('saved_jobs').select('id');
-    
+
     if (userId != null) {
       // Query by user_id for Google Auth users
       query.eq('user_id', userId!);
@@ -322,9 +323,9 @@ class _BookmarkButtonState extends State<BookmarkButton> {
       // Query by user_phone for phone-only users
       query.eq('user_phone', userPhone!);
     }
-    
+
     final res = await query.eq('job_id', widget.job['id']).maybeSingle();
-    
+
     setState(() {
       isBookmarked = res != null;
       loading = false;
@@ -332,21 +333,22 @@ class _BookmarkButtonState extends State<BookmarkButton> {
   }
 
   Future<void> _toggleBookmark() async {
-    if ((userId == null && userPhone == null) || widget.job['id'] == null) return;
+    if ((userId == null && userPhone == null) || widget.job['id'] == null)
+      return;
     setState(() => loading = true);
-    
+
     if (isBookmarked) {
       // Remove bookmark
       final deleteQuery = supabase.from('saved_jobs').delete();
-      
+
       if (userId != null) {
         deleteQuery.eq('user_id', userId!);
       } else {
         deleteQuery.eq('user_phone', userPhone!);
       }
-      
+
       await deleteQuery.eq('job_id', widget.job['id']);
-      
+
       setState(() {
         isBookmarked = false;
         loading = false;
@@ -363,15 +365,15 @@ class _BookmarkButtonState extends State<BookmarkButton> {
       final insertData = <String, dynamic>{
         'job_id': widget.job['id'],
       };
-      
+
       if (userId != null) {
         insertData['user_id'] = userId!;
       } else {
         insertData['user_phone'] = userPhone!;
       }
-      
+
       await supabase.from('saved_jobs').insert(insertData);
-      
+
       setState(() {
         isBookmarked = true;
         loading = false;

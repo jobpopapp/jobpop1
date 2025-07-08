@@ -73,10 +73,10 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
   Future<void> _fetchSavedJobs() async {
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;
-    
+
     String? userId;
     String? userPhone;
-    
+
     if (user != null) {
       // Google Auth user
       userId = user.id;
@@ -95,10 +95,10 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
       }
       debugPrint('Phone-only user: $userPhone');
     }
-    
+
     try {
       List<Map<String, dynamic>> response;
-      
+
       if (userId != null) {
         // Query by user_id for Google Auth users
         response = List<Map<String, dynamic>>.from(await supabase
@@ -116,7 +116,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
             .eq('user_phone', userPhone!)
             .order('id', ascending: false));
       }
-      
+
       debugPrint('Fetched saved jobs: ${response.length}');
       for (final job in response) {
         debugPrint('Saved job: ${job.toString()}');

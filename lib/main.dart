@@ -54,11 +54,43 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _appLinks = AppLinks();
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
     super.initState();
     _handleIncomingLinks();
+    _setupAuthListener();
+  }
+
+  void _setupAuthListener() {
+    // Global auth state listener for OAuth redirects
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+      final event = data.event;
+      final session = data.session;
+
+      if (event == AuthChangeEvent.signedIn && session != null) {
+        print('User signed in globally, checking context');
+
+        // Get current route name to determine behavior
+        final currentRoute =
+            ModalRoute.of(navigatorKey.currentContext!)?.settings.name;
+        print('Current route: $currentRoute');
+
+        if (currentRoute == '/signup') {
+          // If coming from signup, stay on signup screen to complete profile
+          print('Staying on signup screen for profile completion');
+          return;
+        }
+
+        // For login or direct auth, go to job list
+        print('Navigating to job list');
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          '/jobs',
+          (route) => false,
+        );
+      }
+    });
   }
 
   void _handleIncomingLinks() {
@@ -79,11 +111,11 @@ class _MyAppState extends State<MyApp> {
 
   void _handleDeepLink(Uri uri) {
     print('Received deep link: $uri');
-    
+
     // Handle Supabase OAuth redirect
     if (uri.scheme == 'jobpopp') {
       print('Handling jobpopp deep link: $uri');
-      
+
       try {
         // Handle auth callback specifically
         if (uri.host == 'auth-callback' || uri.path.contains('auth-callback')) {
@@ -105,6 +137,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context).locale.languageCode;
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: t('appTitle', lang),
       theme: ThemeData(
         colorScheme: ColorScheme(
@@ -154,8 +187,30 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthStatus();
+  }
+
+  void _checkAuthStatus() async {
+    // Check if user is already authenticated
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
+      // User is authenticated, redirect to job list
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/jobs');
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -2,9 +2,12 @@
 
 const Map<String, Map<String, String>> kTranslations = {
   'appTitle': {'en': 'Job Pop', 'lg': 'Job Pop'},
+  'slogan': {'en': 'Making it easy', 'lg': 'Tukifusiza ekyangu'},
   'login': {'en': 'Login', 'lg': 'Yingira'},
   'signup': {'en': 'Sign Up', 'lg': 'Wewandiise'},
   'chooseLanguage': {'en': 'Choose Language', 'lg': 'Londa Olulimi'},
+  'english': {'en': 'English', 'lg': 'Olungereza'},
+  'luganda': {'en': 'Luganda', 'lg': 'Oluganda'},
   'profile': {'en': 'Profile', 'lg': 'Bwino wo'},
   'logout': {'en': 'Logout', 'lg': 'Vamu'},
   'findAJobAnywhere': {
@@ -73,6 +76,26 @@ const Map<String, Map<String, String>> kTranslations = {
   'signUpWithGoogle': {
     'en': 'Sign up with Google',
     'lg': 'Wandiika nga okozesa Google'
+  },
+  'phoneRequired': {
+    'en': 'Phone number is required',
+    'lg': 'Namba ya ssimu yetaagisa'
+  },
+  'phoneFormat': {
+    'en': 'Please enter a valid phone number',
+    'lg': 'Yingiza namba ya ssimu etuufu'
+  },
+  'signupWithGoogle': {
+    'en': 'Sign up with Google?',
+    'lg': 'Wandiika nga okozesa Google?'
+  },
+  'signupWithGoogleMsg': {
+    'en': 'Do you want to continue with Google signup?',
+    'lg': 'Oyagala okukagiira n\'okwandika nga okozesa Google?'
+  },
+  'continueWithGoogle': {
+    'en': 'Continue with Google',
+    'lg': 'Kagiira nga okozesa Google'
   },
   'noUserFound': {
     'en': 'No user found with that phone or username.',

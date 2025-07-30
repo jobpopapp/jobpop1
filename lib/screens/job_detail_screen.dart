@@ -127,7 +127,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             const SizedBox(height: 8),
             Text(t('company', lang) + ': ${job['company']}',
                 style: GoogleFonts.montserrat()),
-            Text(t('category', lang) + ': ${job['category']}',
+            Text(t('category', lang) + ': ${job['categories']?['name'] ?? ''}',
                 style: GoogleFonts.montserrat()),
             Text(t('country', lang) + ': ${job['country']}',
                 style: GoogleFonts.montserrat()),

@@ -115,7 +115,7 @@ class _JobListScreenState extends State<JobListScreen> {
       debugPrint('Fetching jobs...');
       debugPrint('Selected location: $_selectedLocation');
       debugPrint('Selected category: $_selectedCategory');
-      var query = supabase.from('jobs').select();
+      var query = supabase.from('jobs').select('*, categories(name)');
       bool filterAbroadClientSide = false;
 
       // Apply filters before ordering
@@ -407,7 +407,7 @@ class _JobListScreenState extends State<JobListScreen> {
                                   children: [
                                     Text(
                                         t('category', lang) +
-                                            ': ${job['category'] ?? ''}',
+                                            ': ${job['categories']?['name'] ?? ''}',
                                         style: GoogleFonts.montserrat(
                                             fontSize: 12)),
                                     Text(

@@ -120,13 +120,11 @@ class _JobListScreenState extends State<JobListScreen> {
 
       // Apply filters before ordering
       if (_selectedLocation == 'Uganda') {
-        debugPrint('Applying filter: country == Uganda');
-        query = query.eq('country', 'Uganda');
+        debugPrint('Applying filter: country ilike %uganda%');
+        query = query.ilike('country', '%uganda%');
       } else if (_selectedLocation == 'Abroad') {
-        debugPrint(
-            'Applying filter: country != Uganda (client-side for web and all platforms)');
-        filterAbroadClientSide = true;
-        // Do not add any country filter to the query
+        debugPrint('Applying filter: country not.ilike %uganda%');
+        query = query.not('country', 'ilike', '%uganda%');
       }
       if (_selectedCategory != null &&
           _selectedCategory != 'All Jobs' &&

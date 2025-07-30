@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -40,12 +41,20 @@ class _LoginScreenState extends State<LoginScreen> {
         .languageCode;
     setState(() => _isLoading = true);
     try {
-      await Supabase.instance.client.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: 'jobpopp://auth-callback',
-        authScreenLaunchMode: LaunchMode.externalApplication,
-      );
-      // The onAuthStateChange listener in initState will handle navigation after sign-in
+      // Use a conditional check for the platform
+      if (kIsWeb) {
+        // For web, use the default authentication flow
+        await Supabase.instance.client.auth.signInWithOAuth(
+          OAuthProvider.google,
+        );
+      } else {
+        // For mobile, use the deep link redirect
+        await Supabase.instance.client.auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: 'jobpopp://auth-callback',
+          authScreenLaunchMode: LaunchMode.externalApplication,
+        );
+      }
     } catch (error) {
       print('Google sign-in failed: $error');
       ScaffoldMessenger.of(context).showSnackBar(

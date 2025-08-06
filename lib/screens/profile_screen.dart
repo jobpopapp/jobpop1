@@ -4,7 +4,7 @@ import 'package:jobpopp/widgets/custom_app_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
-import '../utils/manual_localization.dart';
+import '../utils/manual_localization.dart' show t;
 import '../utils/language_provider.dart';
 
 class ProfileScreen extends StatefulWidget {

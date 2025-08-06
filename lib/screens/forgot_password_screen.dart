@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../utils/manual_localization.dart';
+import '../utils/manual_localization.dart' show t;
 import '../utils/language_provider.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {

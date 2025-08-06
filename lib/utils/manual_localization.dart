@@ -118,6 +118,7 @@ const Map<String, Map<String, String>> kTranslations = {
     'en': 'This app is safe and regulated by the Government of Uganda',
     'lg': 'Eno app yesigika era elondolwa Gavumenti ya Uganda'
   },
+  'howToApply': {'en': 'How to Apply', 'lg': "Engeri y'Okusabiramu"},
 };
 
 String t(String key, String lang) {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../utils/language_provider.dart';
-import '../utils/manual_localization.dart';
+import '../utils/manual_localization.dart' show t;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show OAuthProvider;
 import 'package:shared_preferences/shared_preferences.dart';

@@ -5,7 +5,7 @@ import 'package:jobpopp/widgets/custom_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
-import '../utils/manual_localization.dart';
+import '../utils/manual_localization.dart' show t;
 import '../utils/language_provider.dart';
 
 class JobDetailScreen extends StatefulWidget {
@@ -85,6 +85,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         'company_website': '',
         'application_link': '',
         'contact_phone': '',
+        'whatsapp': '',
       };
     }
 
@@ -123,16 +124,16 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           children: [
             Text(job['title'] ?? '',
                 style: GoogleFonts.montserrat(
-                    fontSize: 24, fontWeight: FontWeight.bold)),
+                    fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue)),
             const SizedBox(height: 8),
             Text(t('company', lang) + ': ${job['company']}',
-                style: GoogleFonts.montserrat()),
+                style: GoogleFonts.montserrat(color: Colors.blue)),
             Text(t('category', lang) + ': ${job['categories']?['name'] ?? ''}',
-                style: GoogleFonts.montserrat()),
+                style: GoogleFonts.montserrat(color: Colors.blue)),
             Text(t('country', lang) + ': ${job['country']}',
-                style: GoogleFonts.montserrat()),
+                style: GoogleFonts.montserrat(color: Colors.blue)),
             Text(t('salary', lang) + ': ${job['salary']}',
-                style: GoogleFonts.montserrat()),
+                style: GoogleFonts.montserrat(color: Colors.blue)),
             // Deadline: bold, red if past, green if future
             Builder(
               builder: (context) {
@@ -211,13 +212,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
             // Show job description, fallback if missing
             if ((job['description'] ?? '').toString().trim().isNotEmpty)
-              Text(job['description'] ?? '', style: GoogleFonts.montserrat())
+              Text(job['description'] ?? '', style: GoogleFonts.montserrat(color: Colors.blue))
             else if ((job['job_description'] ?? '')
                 .toString()
                 .trim()
                 .isNotEmpty)
               Text(job['job_description'] ?? '',
-                  style: GoogleFonts.montserrat())
+                  style: GoogleFonts.montserrat(color: Colors.blue))
             else
               Text(t('noDescriptionProvided', lang),
                   style: GoogleFonts.montserrat(
@@ -225,9 +226,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             const SizedBox(height: 16),
             Text(t('requirements', lang),
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
-            Text(job['requirements'] ?? '', style: GoogleFonts.montserrat()),
+            Text(job['requirements'] ?? '', style: GoogleFonts.montserrat(color: Colors.blue)),
             const SizedBox(height: 16),
-            if ((job['application_link'] ?? '').toString().isNotEmpty)
+            if (((job['email'] ?? '').toString().isNotEmpty) ||
+                ((job['contact_phone'] ?? '').toString().isNotEmpty) ||
+                ((job['whatsapp'] ?? '').toString().isNotEmpty) ||
+                ((job['application_link'] ?? '').toString().isNotEmpty))
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ElevatedButton(
@@ -489,7 +493,7 @@ class _JobApplyScreenState extends State<JobApplyScreen> {
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text(
                 job['company'] ?? '',
-                style: GoogleFonts.montserrat(height: 1.2),
+                style: GoogleFonts.montserrat(height: 1.2, color: Colors.blue),
               ),
             ),
             Padding(
@@ -504,7 +508,7 @@ class _JobApplyScreenState extends State<JobApplyScreen> {
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text(
                 job['deadline'] ?? '',
-                style: GoogleFonts.montserrat(height: 1.2),
+                style: GoogleFonts.montserrat(height: 1.2, color: Colors.blue),
               ),
             ),
             Padding(
@@ -519,7 +523,7 @@ class _JobApplyScreenState extends State<JobApplyScreen> {
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text(
                 job['requirements'] ?? '',
-                style: GoogleFonts.montserrat(height: 1.2),
+                style: GoogleFonts.montserrat(height: 1.2, color: Colors.blue),
               ),
             ),
             Padding(
@@ -667,6 +671,78 @@ class _JobApplyScreenState extends State<JobApplyScreen> {
                     ),
                     child: Text(
                       job['contact_phone'] ?? '',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.blue,
+                        decoration: TextDecoration.none,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if ((job['whatsapp'] ?? '').toString().isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Text(
+                  'WhatsApp:',
+                  style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.bold, height: 1.2),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  final whatsapp = job['whatsapp'];
+                  if (whatsapp != null) {
+                    launchUrl(Uri.parse('https://wa.me/$whatsapp'));
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.blue, width: 1),
+                      ),
+                    ),
+                    child: Text(
+                      job['whatsapp'] ?? '',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.blue,
+                        decoration: TextDecoration.none,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if ((job['whatsapp'] ?? '').toString().isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Text(
+                  'WhatsApp:',
+                  style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.bold, height: 1.2),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  final whatsapp = job['whatsapp'];
+                  if (whatsapp != null) {
+                    launchUrl(Uri.parse('https://wa.me/$whatsapp'));
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.blue, width: 1),
+                      ),
+                    ),
+                    child: Text(
+                      job['whatsapp'] ?? '',
                       style: GoogleFonts.montserrat(
                         color: Colors.blue,
                         decoration: TextDecoration.none,

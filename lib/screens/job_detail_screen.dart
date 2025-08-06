@@ -122,19 +122,81 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         padding: const EdgeInsets.all(24.0),
         child: ListView(
           children: [
-            Text(job['title'] ?? '',
-                style: GoogleFonts.montserrat(
-                    fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue)),
+            Text(
+              job['title'] ?? '',
+              style: GoogleFonts.montserrat(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: const Color.fromARGB(255, 0, 75, 136),
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(t('company', lang) + ': ${job['company']}',
-                style: GoogleFonts.montserrat(color: Colors.blue)),
-            Text(t('category', lang) + ': ${job['categories']?['name'] ?? ''}',
-                style: GoogleFonts.montserrat(color: Colors.blue)),
-            Text(t('country', lang) + ': ${job['country']}',
-                style: GoogleFonts.montserrat(color: Colors.blue)),
-            Text(t('salary', lang) + ': ${job['salary']}',
-                style: GoogleFonts.montserrat(color: Colors.blue)),
-            // Deadline: bold, red if past, green if future
+
+            // Company
+            RichText(
+              text: TextSpan(
+                style: GoogleFonts.montserrat(fontSize: 16),
+                children: [
+                  TextSpan(
+                      text: '${t('company', lang)}: ',
+                      style: const TextStyle(color: Colors.black)),
+                  TextSpan(
+                      text: job['company'] ?? '',
+                      style: const TextStyle(
+                          color: Color.fromARGB(255, 0, 75, 136))),
+                ],
+              ),
+            ),
+
+            // Category
+            RichText(
+              text: TextSpan(
+                style: GoogleFonts.montserrat(fontSize: 16),
+                children: [
+                  TextSpan(
+                      text: '${t('category', lang)}: ',
+                      style: const TextStyle(color: Colors.black)),
+                  TextSpan(
+                      text: job['categories']?['name'] ?? '',
+                      style: const TextStyle(
+                          color: Color.fromARGB(255, 0, 75, 136))),
+                ],
+              ),
+            ),
+
+            // Country
+            RichText(
+              text: TextSpan(
+                style: GoogleFonts.montserrat(fontSize: 16),
+                children: [
+                  TextSpan(
+                      text: '${t('country', lang)}: ',
+                      style: const TextStyle(color: Colors.black)),
+                  TextSpan(
+                      text: job['country'] ?? '',
+                      style: const TextStyle(
+                          color: Color.fromARGB(255, 0, 75, 136))),
+                ],
+              ),
+            ),
+
+            // Salary
+            RichText(
+              text: TextSpan(
+                style: GoogleFonts.montserrat(fontSize: 16),
+                children: [
+                  TextSpan(
+                      text: '${t('salary', lang)}: ',
+                      style: const TextStyle(color: Colors.black)),
+                  TextSpan(
+                      text: job['salary'] ?? '',
+                      style: const TextStyle(
+                          color: Color.fromARGB(255, 0, 75, 136))),
+                ],
+              ),
+            ),
+
+            // Deadline and Status
             Builder(
               builder: (context) {
                 final deadlineStr = job['deadline'] ?? '';
@@ -147,7 +209,6 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 final now = DateTime.now();
                 final isPast = deadline != null && deadline.isBefore(now);
 
-                // Status logic
                 String statusText;
                 Color statusBg;
                 Color statusTextColor = Colors.white;
@@ -162,7 +223,6 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   statusBg = Colors.green;
                 }
 
-                // Deadline text color logic
                 Color deadlineTextColor;
                 if (deadline == null) {
                   deadlineTextColor = Colors.black;
@@ -175,11 +235,18 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      t('deadline', lang) + ': $deadlineStr',
-                      style: GoogleFonts.montserrat(
-                        fontWeight: FontWeight.bold,
-                        color: deadlineTextColor,
+                    RichText(
+                      text: TextSpan(
+                        style:
+                            GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+                        children: [
+                          TextSpan(
+                              text: '${t('deadline', lang)}: ',
+                              style: TextStyle(color: Colors.black)),
+                          TextSpan(
+                              text: deadlineStr,
+                              style: TextStyle(color: deadlineTextColor)),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -208,26 +275,49 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             ),
 
             const SizedBox(height: 16),
-            Text(t('jobDescription', lang),
-                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
-            // Show job description, fallback if missing
+
+            // Job Description
+            Text(
+              t('jobDescription', lang),
+              style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+            ),
             if ((job['description'] ?? '').toString().trim().isNotEmpty)
-              Text(job['description'] ?? '', style: GoogleFonts.montserrat(color: Colors.blue))
+              Text(
+                job['description'] ?? '',
+                style: GoogleFonts.montserrat(
+                    color: const Color.fromARGB(255, 0, 75, 136)),
+              )
             else if ((job['job_description'] ?? '')
                 .toString()
                 .trim()
                 .isNotEmpty)
-              Text(job['job_description'] ?? '',
-                  style: GoogleFonts.montserrat(color: Colors.blue))
+              Text(
+                job['job_description'] ?? '',
+                style: GoogleFonts.montserrat(
+                    color: const Color.fromARGB(255, 0, 75, 136)),
+              )
             else
-              Text(t('noDescriptionProvided', lang),
-                  style: GoogleFonts.montserrat(
-                      fontStyle: FontStyle.italic, color: Colors.grey)),
+              Text(
+                t('noDescriptionProvided', lang),
+                style: GoogleFonts.montserrat(
+                    fontStyle: FontStyle.italic, color: Colors.grey),
+              ),
+
             const SizedBox(height: 16),
-            Text(t('requirements', lang),
-                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold)),
-            Text(job['requirements'] ?? '', style: GoogleFonts.montserrat(color: Colors.blue)),
+
+            // Requirements
+            Text(
+              t('requirements', lang),
+              style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              job['requirements'] ?? '',
+              style: GoogleFonts.montserrat(color: Colors.blue),
+            ),
+
             const SizedBox(height: 16),
+
+            // Apply Button
             if (((job['email'] ?? '').toString().isNotEmpty) ||
                 ((job['contact_phone'] ?? '').toString().isNotEmpty) ||
                 ((job['whatsapp'] ?? '').toString().isNotEmpty) ||
@@ -240,9 +330,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => JobApplyScreen(
-                            job: job.map(
-                                    (k, v) => MapEntry(k, v?.toString() ?? ''))
-                                as Map<String, String>),
+                          job: job.map(
+                                  (k, v) => MapEntry(k, v?.toString() ?? ''))
+                              as Map<String, String>,
+                        ),
                       ),
                     );
                   },
@@ -252,8 +343,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         borderRadius: BorderRadius.circular(12)),
                     minimumSize: const Size.fromHeight(48),
                   ),
-                  child: Text(t('howToApply', lang),
-                      style: GoogleFonts.montserrat(fontSize: 18)),
+                  child: Text(
+                    t('howToApply', lang),
+                    style: GoogleFonts.montserrat(fontSize: 18),
+                  ),
                 ),
               ),
           ],

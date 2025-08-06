@@ -223,28 +223,28 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: GoogleFonts.montserrat(
                         fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 40),
-                OutlinedButton(
+                ElevatedButton(
                   onPressed: _isLoading ? null : _signInWithGoogle,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.transparent),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF49973B), // Custom Green
+                    foregroundColor: Colors.white, // White text/icon
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
+                      borderRadius: BorderRadius.circular(8), // Rounded corners
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 0),
+                    padding: const EdgeInsets.symmetric(vertical: 14), // Adjust padding for height
+                    minimumSize: const Size(double.infinity, 48), // Full width, 48px height
+                    elevation: 5, // Add some shadow
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(
-                        'assets/google.png',
-                        height: 40,
-                        width: 40,
-                      ),
+                      Icon(Icons.g_mobiledata, color: Colors.white, size: 24), // Google icon
                       const SizedBox(width: 12),
                       Text(t('signInWithGoogle', lang),
                           style: GoogleFonts.montserrat(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold)),
+                              color: Colors.white, // Ensure text is white
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16)), // Adjust font size
                     ],
                   ),
                 ),

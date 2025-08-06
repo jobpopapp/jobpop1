@@ -303,11 +303,16 @@ class _MyHomePageState extends State<MyHomePage> {
                             .setLocale(val);
                       }
                     },
-                    activeColor: Colors.white,
+                    fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                      if (states.contains(MaterialState.selected)) {
+                        return Colors.amber; // Selected color
+                      }
+                      return Colors.white; // Unselected color
+                    }),
                   ),
                   Text(
                     t('luganda', lang),
-                    style: GoogleFonts.montserrat(color: Colors.white),
+                    style: GoogleFonts.montserrat(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 20),
                   Radio<String>(
@@ -319,11 +324,16 @@ class _MyHomePageState extends State<MyHomePage> {
                             .setLocale(val);
                       }
                     },
-                    activeColor: Colors.white,
+                    fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                      if (states.contains(MaterialState.selected)) {
+                        return Colors.amber; // Selected color
+                      }
+                      return Colors.white; // Unselected color
+                    }),
                   ),
                   Text(
                     t('english', lang),
-                    style: GoogleFonts.montserrat(color: Colors.white),
+                    style: GoogleFonts.montserrat(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),

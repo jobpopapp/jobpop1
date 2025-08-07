@@ -307,7 +307,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: GoogleFonts.montserrat(color: Colors.blue)),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/signup');
+                  },
                   child: Text(t('createNewAccount', lang),
                       style: GoogleFonts.montserrat(color: Colors.blue)),
                 ),

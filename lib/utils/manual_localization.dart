@@ -119,6 +119,16 @@ const Map<String, Map<String, String>> kTranslations = {
     'lg': 'Eno app yesigika era elondolwa Gavumenti ya Uganda'
   },
   'howToApply': {'en': 'How to Apply', 'lg': "Engeri y'Okusabiramu"},
+  'sendOtp': {'en': 'Send OTP', 'lg': 'Sinda OTP'},
+  'enterOtp': {'en': 'Enter OTP', 'lg': 'Yingiza OTP'},
+  'newPassword': {'en': 'New Password', 'lg': 'Pasiwaadi Empya'},
+  'otpRequired': {'en': 'OTP is required', 'lg': 'OTP yetaagisa'},
+  'otpInvalid': {'en': 'Invalid OTP', 'lg': 'OTP si nnuunji'},
+  'newPasswordRequired': {'en': 'New password is required', 'lg': 'Pasiwaadi empya yetaagisa'},
+  'passwordMinLength': {'en': 'Password must be at least 6 characters', 'lg': 'Pasiwaadi erina okuba nga erimu ennukuta mukaaga oba okusingawo'},
+  'otpSent': {'en': 'OTP sent to your phone.', 'lg': 'OTP etumiddwa ku ssimu yo.'},
+  'passwordResetSuccess': {'en': 'Password reset successfully!', 'lg': 'Pasiwaadi ekyusiddwa bulungi!'},
+  'resetPassword': {'en': 'Reset Password', 'lg': 'Kyusa Pasiwaadi'},
 };
 
 String t(String key, String lang) {
